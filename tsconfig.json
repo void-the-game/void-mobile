@@ -6,5 +6,18 @@
     "paths": {
       "@/*": ["src/*"]
     },
-  }
+    "types": ["react-native",  "node"],
+  },
+  "include":[
+    "src/tests/**/*",
+    "./src/**/*",
+    "index.d.ts",
+    "*.mjs",
+    ".*.mjs",
+    "*.js",
+    ".*.js",
+    "*.ts",
+    ".prettierrc.mjs"
+  ],
+  "exclude": ["node_modules", "_", "android", "ios"],
 }
