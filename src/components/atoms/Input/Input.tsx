@@ -69,7 +69,7 @@ export default function Input({
           {...props}
         />
 
-        {rightIcon && <View style={{}}>{rightIcon}</View>}
+        {rightIcon && <View>{rightIcon}</View>}
       </View>
     </View>
   );
