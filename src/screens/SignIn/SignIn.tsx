@@ -55,7 +55,7 @@ export default function SignIn() {
               rightIcon={shipIcon}
             />
             <View style={layout.selfStart}>
-              <Link style={(spacing.mr_sm, spacing.ml_lg)}>
+              <Link style={[spacing.mr_sm, spacing.ml_lg]}>
                 Esqueci a senha
               </Link>
             </View>
