@@ -32,10 +32,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 0,
   },
-  content: {
-    flex: 1,
-    zIndex: 1,
-  },
 });
 
 export default SpaceBackgroundWrapper;
