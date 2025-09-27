@@ -4,7 +4,7 @@ import { useTheme } from '@/theme/hooks/useTheme';
 import Icon from 'react-native-vector-icons/Feather';
 
 export default function HomeHeader() {
-  const { layout, spacing, colors } = useTheme();
+  const { colors, layout, spacing } = useTheme();
 
   return (
     <View
@@ -12,7 +12,6 @@ export default function HomeHeader() {
         layout.row,
         layout.itemsCenter,
         layout.justifyBetween,
-        spacing.py_md,
         spacing.py_2xl,
       ]}
     >
