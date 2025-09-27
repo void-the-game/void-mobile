@@ -34,7 +34,7 @@ export default function SignIn() {
               <View style={[spacing.mt_xl, layout.itemsCenter, { gap: 12 }]}>
                 <Button
                   title="Entrar"
-                  onPress={() => console.log('will go to home')}
+                  onPress={() => navigation.navigate(Paths.Home)}
                 />
                 <View
                   style={{
