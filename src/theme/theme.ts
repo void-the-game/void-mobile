@@ -1,4 +1,3 @@
-import { backgrounds } from './backgrounds';
 import { colors } from './colors';
 import { gutters } from './gutters';
 import fonts from './fonts';
@@ -10,7 +9,6 @@ export const theme = {
   fonts,
   gutters,
   layout,
-  backgrounds,
   spacing,
 };
 
