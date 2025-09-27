@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { StarField } from '@/components/molecules/StarField';
 import { generateStarCoordinates } from '@/utils/generateStarCoordinates';
@@ -22,7 +23,8 @@ const SpaceBackgroundWrapper: React.FC<Props> = ({
   return (
     <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
       <StarField stars={stars} style={styles.stars} />
-      <View style={layout.flex_1}>{children}</View>
+
+      <SafeAreaView style={layout.flex_1}>{children}</SafeAreaView>
     </View>
   );
 };
