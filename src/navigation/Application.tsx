@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Paths } from '@/navigation/paths';
-import { SignIn, SignUp } from '@/screens';
+import { Home, SignIn, SignUp } from '@/screens';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -16,6 +16,7 @@ function ApplicationNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen component={SignIn} name={Paths.SignIn} />
           <Stack.Screen component={SignUp} name={Paths.SignUp} />
+          <Stack.Screen component={Home} name={Paths.Home} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
