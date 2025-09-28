@@ -23,7 +23,7 @@ const SpaceBackgroundWrapper: React.FC<Props> = ({
   return (
     <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
       <StarField stars={stars} style={styles.stars} />
-
+      
       <SafeAreaView style={layout.flex_1}>{children}</SafeAreaView>
     </View>
   );
