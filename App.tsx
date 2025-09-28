@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import ApplicationNavigator from '@/navigation/Application';
+import {
+  useFonts as useAldrich,
+  Aldrich_400Regular,
+} from '@expo-google-fonts/aldrich';
+import {
+  useFonts as useBrunoAce,
+  BrunoAce_400Regular,
+} from '@expo-google-fonts/bruno-ace';
+
+import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React from 'react';
 
 export default function App() {
+  const [aldrichLoaded] = useAldrich({ Aldrich_400Regular });
+  const [brunoAceLoaded] = useBrunoAce({ BrunoAce_400Regular });
+
+  const fontsLoaded = aldrichLoaded && brunoAceLoaded;
+
+  React.useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ApplicationNavigator />
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
