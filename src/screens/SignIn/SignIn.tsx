@@ -6,9 +6,16 @@ import { useTheme } from '@/theme/hooks/useTheme';
 import { View, Image } from 'react-native';
 import { VoidHeader } from '@/components/atoms/VoidHeader';
 import { SpaceBackgroundWrapper } from '@/components/organisms/SpaceBackgroundWrapper';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '@/navigation/types';
+import { Paths } from '@/navigation/paths';
+import { useNavigation } from '@react-navigation/native';
+
+type Navigation = StackNavigationProp<RootStackParamList>;
 
 export default function SignIn() {
   const { colors, layout, spacing } = useTheme();
+  const navigation = useNavigation<Navigation>();
 
   const shipIcon = (
     <Image
@@ -38,7 +45,7 @@ export default function SignIn() {
                 />
                 <Button
                   title="Criar conta"
-                  onPress={() => console.log('will go to sign up')}
+                  onPress={() => navigation.navigate(Paths.SignUp)}
                 />
               </View>
             }

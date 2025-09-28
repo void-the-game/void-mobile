@@ -7,4 +7,5 @@ export type RootScreenProps<
 
 export type RootStackParamList = {
   [Paths.SignIn]: undefined;
+  [Paths.SignUp]: undefined;
 };
