@@ -2,6 +2,7 @@ import React from 'react';
 import {
   TouchableOpacity,
   Image,
+  View,
   type ImageSourcePropType,
   type TouchableOpacityProps,
 } from 'react-native';
@@ -10,10 +11,11 @@ import { useTheme } from '@/theme/hooks/useTheme';
 
 type MenuButtonProps = {
   title: string;
-  characterImage: ImageSourcePropType;
+  characterImage?: ImageSourcePropType;
+  icon?: React.ReactNode;
 } & TouchableOpacityProps;
 
-function MenuButton({ title, characterImage, ...props }: MenuButtonProps) {
+function MenuButton({ title, characterImage, icon, ...props }: MenuButtonProps) {
   const { colors, fonts, gutters, layout, spacing } = useTheme();
 
   return (
@@ -45,11 +47,18 @@ function MenuButton({ title, characterImage, ...props }: MenuButtonProps) {
       >
         {title}
       </Text>
-      <Image
-        source={characterImage}
-        style={{ width: '60%', height: '60%' }}
-        resizeMode="contain"
-      />
+      
+      {icon ? (
+        <View style={{ width: '60%', height: '60%', justifyContent: 'center', alignItems: 'center' }}>
+          {icon}
+        </View>
+      ) : characterImage ? (
+        <Image
+          source={characterImage}
+          style={{ width: '60%', height: '60%' }}
+          resizeMode="contain"
+        />
+      ) : null}
     </TouchableOpacity>
   );
 }
