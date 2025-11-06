@@ -10,8 +10,17 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/navigation/types';
 import { Paths } from '@/navigation/paths';
 import { useNavigation } from '@react-navigation/native';
+import * as yup from 'yup';
+import { Controller, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { apiDev } from '@/services/api';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
+
+type SignInFormData = {
+  email: string;
+  password: string;
+};
 
 export default function SignIn() {
   const { colors, layout, spacing } = useTheme();
@@ -24,6 +33,28 @@ export default function SignIn() {
     />
   );
 
+  const schema = yup.object().shape({
+    email: yup.string().required('Campo Obrigatório').email('E-mail inválido'),
+    password: yup.string().required('Campo Obrigatório'),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const handleSignIn = (data: SignInFormData) => {
+    apiDev
+      .post('/user/login', data)
+      .then(() => {
+        navigation.navigate(Paths.Home);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   return (
     <SpaceBackgroundWrapper>
       <View style={[layout.flex_1, spacing.px_xl]}>
@@ -32,10 +63,7 @@ export default function SignIn() {
           <AuthFormContainer
             footer={
               <View style={[spacing.mt_xl, layout.itemsCenter, { gap: 12 }]}>
-                <Button
-                  title="Entrar"
-                  onPress={() => navigation.navigate(Paths.Home)}
-                />
+                <Button title="Entrar" onPress={handleSubmit(handleSignIn)} />
                 <View
                   style={{
                     height: 3,
@@ -50,16 +78,36 @@ export default function SignIn() {
               </View>
             }
           >
-            <Input
-              placeholder="Usuário ou E-mail"
-              withCustomFormat
-              rightIcon={shipIcon}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="E-mail"
+                  withCustomFormat
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.email?.message}
+                  rightIcon={shipIcon}
+                />
+              )}
             />
-            <Input
-              placeholder="Senha"
-              secureTextEntry
-              withCustomFormat
-              rightIcon={shipIcon}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="Senha"
+                  withCustomFormat
+                  secureTextEntry
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.password?.message}
+                  rightIcon={shipIcon}
+                />
+              )}
             />
             <View style={layout.selfStart}>
               <Link style={[spacing.mr_sm, spacing.ml_lg]}>

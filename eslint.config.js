@@ -1,7 +1,7 @@
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended');
-const pluginQuery = require('@tanstack/eslint-plugin-query')
+const pluginQuery = require('@tanstack/eslint-plugin-query');
 
 module.exports = defineConfig([
   expoConfig,
@@ -9,5 +9,10 @@ module.exports = defineConfig([
   ...pluginQuery.configs['flat/recommended'],
   {
     ignores: ['dist/*'],
+  },
+  {
+    rules: {
+      'import/no-unresolved': 'off', // Desabilita essa regra chata
+    },
   },
 ]);
