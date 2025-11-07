@@ -14,6 +14,7 @@ import * as yup from 'yup';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { apiDev } from '@/services/api';
+import Toast from 'react-native-toast-message';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
 
@@ -49,9 +50,19 @@ export default function SignIn() {
       .post('/user/login', data)
       .then(() => {
         navigation.navigate(Paths.Home);
+        Toast.show({
+          type: 'success',
+          text1: 'Bem-vindo(a) a bordo!',
+          text2: 'Agora é só aproveitar o app.',
+        });
       })
       .catch((err) => {
         console.error(err);
+        Toast.show({
+          type: 'error',
+          text1: 'Login inválido.',
+          text2: 'Confira as informações e tente novamente.',
+        });
       });
   };
 
