@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { Text } from '@/components/atoms/Text';
+import { storage } from '@/services/storage';
 
 function WelcomeMessage() {
   const { layout, spacing, fonts } = useTheme();
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    storage.getUser().then((user) => {
+      if (user) {
+        setUsername(user);
+      }
+    });
+  }, []);
 
   return (
     <View style={[layout.row, layout.itemsEnd, layout.selfEnd, spacing.my_lg]}>
@@ -15,7 +25,7 @@ function WelcomeMessage() {
             { fontFamily: fonts.family.aldrich, color: '#000' },
           ]}
         >
-          Bem vindo de volta tripulante!
+          Bem-vindo(a), tripulante {username}!
         </Text>
         <View style={styles.tail} />
       </View>

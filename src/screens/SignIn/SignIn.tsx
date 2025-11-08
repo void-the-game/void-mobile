@@ -15,6 +15,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { apiDev } from '@/services/api';
 import Toast from 'react-native-toast-message';
+import { useState } from 'react';
+import { storage } from '@/services/storage';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
 
@@ -26,6 +28,7 @@ type SignInFormData = {
 export default function SignIn() {
   const { colors, layout, spacing } = useTheme();
   const navigation = useNavigation<Navigation>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const shipIcon = (
     <Image
@@ -46,9 +49,17 @@ export default function SignIn() {
   } = useForm({ resolver: yupResolver(schema) });
 
   const handleSignIn = (data: SignInFormData) => {
+    setIsLoading(true);
     apiDev
       .post('/user/login', data)
-      .then(() => {
+      .then((resp) => {
+        const { accessToken, username } = resp.data;
+
+        storage.saveToken(accessToken);
+        storage.saveUser(username);
+
+        setIsLoading(false);
+
         navigation.navigate(Paths.Home);
         Toast.show({
           type: 'success',
@@ -63,6 +74,7 @@ export default function SignIn() {
           text1: 'Login inválido.',
           text2: 'Confira as informações e tente novamente.',
         });
+        setIsLoading(false);
       });
   };
 
@@ -74,7 +86,11 @@ export default function SignIn() {
           <AuthFormContainer
             footer={
               <View style={[spacing.mt_xl, layout.itemsCenter, { gap: 12 }]}>
-                <Button title="Entrar" onPress={handleSubmit(handleSignIn)} />
+                <Button
+                  title={isLoading ? 'Entrando' : 'Entrar'}
+                  onPress={handleSubmit(handleSignIn)}
+                  disabled={isLoading}
+                />
                 <View
                   style={{
                     height: 3,
