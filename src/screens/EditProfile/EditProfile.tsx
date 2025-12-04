@@ -1,7 +1,7 @@
 import { AuthFormContainer } from '@/components/organisms/AuthFormContainer';
 import { Input } from '@/components/atoms/Input';
 import { useTheme } from '@/theme/hooks/useTheme';
-import { View, Alert, TouchableOpacity, Text } from 'react-native';
+import { View, Alert, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { SpaceBackgroundWrapper } from '@/components/organisms/SpaceBackgroundWrapper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/navigation/types';
@@ -17,6 +17,7 @@ import { Feather } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/Feather';
 import { AstronautIcon } from '@/components/svg/svgIcons';
 import { apiDev } from '@/services/api';
+import { HomeHeader } from '@/components/organisms/HomeHeader';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
 
@@ -171,21 +172,8 @@ export default function EditProfile() {
   return (
     <SpaceBackgroundWrapper>
       <View style={[layout.flex_1, spacing.px_xl]}>
-        <View
-          style={[
-            layout.row,
-            layout.itemsCenter,
-            layout.justifyBetween,
-            spacing.py_lg,
-            spacing.pt_md,
-          ]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="menu" size={28} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon name="bell" size={24} color={colors.text} />
-          </TouchableOpacity>
+        <View style={styles.headerContainer}>
+          <HomeHeader />
         </View>
 
         <View style={[layout.itemsCenter]}>
@@ -361,3 +349,9 @@ export default function EditProfile() {
     </SpaceBackgroundWrapper>
   );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    marginTop: -26,
+  },
+});
