@@ -52,11 +52,12 @@ export default function SignIn() {
     setIsLoading(true);
     apiDev
       .post('/user/login', data)
-      .then((resp) => {
-        const { accessToken, username } = resp.data;
+      .then(async (resp) => {
+        const { accessToken, username, id } = resp.data;
 
-        storage.saveToken(accessToken);
-        storage.saveUser(username);
+        await storage.saveToken(accessToken);
+        await storage.saveUser(username);
+        await storage.saveUserId(id);
 
         setIsLoading(false);
 

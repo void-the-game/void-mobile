@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { Text } from '@/components/atoms/Text';
 import { storage } from '@/services/storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 function WelcomeMessage() {
   const { layout, spacing, fonts } = useTheme();
   const [username, setUsername] = useState('');
 
-  useEffect(() => {
-    storage.getUser().then((user) => {
-      if (user) {
-        setUsername(user);
-      }
-    });
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadUsername = async () => {
+        const user = await storage.getUser();
+        if (user) {
+          setUsername(user);
+        }
+      };
+
+      loadUsername();
+    }, []),
+  );
 
   return (
     <View style={[layout.row, layout.itemsEnd, layout.selfEnd, spacing.my_lg]}>

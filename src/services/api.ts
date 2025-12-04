@@ -3,8 +3,10 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getBaseURL = () => {
-  if (!__DEV__) {
-    return 'https://sua-api-producao.com/api';
+  const FORCE_PROD = false; // ⚠️ TEMPORÁRIO: true = usa produção localmente, false = usa dev
+
+  if (!__DEV__ || FORCE_PROD) {
+    return 'https://gargantua.azurewebsites.net/api';
   }
 
   // Tentar pegar o IP do host

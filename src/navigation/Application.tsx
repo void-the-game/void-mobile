@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Paths } from '@/navigation/paths';
-import { Home, SignIn, SignUp } from '@/screens';
+import { Home, SignIn, SignUp, EditProfile } from '@/screens';
 import TutorialScreen from '@/screens/Tutorial/TutorialScreen';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
@@ -20,6 +20,7 @@ function ApplicationNavigator() {
           <Stack.Screen component={SignUp} name={Paths.SignUp} />
           <Stack.Screen component={Home} name={Paths.Home} />
           <Stack.Screen component={TutorialScreen} name={Paths.Tutorial} />
+          <Stack.Screen component={EditProfile} name={Paths.EditProfile} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast
@@ -28,18 +29,18 @@ function ApplicationNavigator() {
             <BaseToast
               {...props}
               style={{
-                borderLeftColor: '#10B981', // Verde (mantém a borda lateral)
-                backgroundColor: '#262251', // Seu fundo roxo
+                borderLeftColor: '#10B981',
+                backgroundColor: '#262251',
               }}
               contentContainerStyle={{ paddingHorizontal: 15 }}
               text1Style={{
                 fontSize: 15,
                 fontWeight: '600',
-                color: 'white', // Texto branco
+                color: 'white',
               }}
               text2Style={{
                 fontSize: 13,
-                color: 'white', // Texto branco
+                color: 'white',
               }}
             />
           ),
@@ -47,18 +48,37 @@ function ApplicationNavigator() {
             <ErrorToast
               {...props}
               style={{
-                borderLeftColor: '#EF4444', // Vermelho (mantém a borda lateral)
-                backgroundColor: '#262251', // Seu fundo roxo
+                borderLeftColor: '#EF4444',
+                backgroundColor: '#262251',
               }}
               contentContainerStyle={{ paddingHorizontal: 15 }}
               text1Style={{
                 fontSize: 15,
                 fontWeight: '600',
-                color: 'white', // Texto branco
+                color: 'white', //
               }}
               text2Style={{
                 fontSize: 13,
-                color: 'white', // Texto branco
+                color: 'white', //
+              }}
+            />
+          ),
+          info: (props) => (
+            <ErrorToast
+              {...props}
+              style={{
+                borderLeftColor: '#50BBE9',
+                backgroundColor: '#262251',
+              }}
+              contentContainerStyle={{ paddingHorizontal: 15 }}
+              text1Style={{
+                fontSize: 15,
+                fontWeight: '600',
+                color: 'white',
+              }}
+              text2Style={{
+                fontSize: 13,
+                color: 'white',
               }}
             />
           ),

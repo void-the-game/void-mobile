@@ -15,9 +15,9 @@ export default function HomeScreen() {
 
   const menuItems = [
     {
-      title: 'Alterar personagem',
+      title: 'Editar perfil',
       icon: <AstronautIcon color="#10B981" size={80} />, // Verde
-      onPress: () => null,
+      onPress: () => navigation.navigate(Paths.EditProfile),
     },
     {
       title: 'Encontrar partida',
