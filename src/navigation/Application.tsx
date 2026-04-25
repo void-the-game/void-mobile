@@ -5,7 +5,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Paths } from '@/navigation/paths';
-import { Home, SignIn, SignUp } from '@/screens';
+import { Home, SignIn, SignUp, EditProfile } from '@/screens';
+import TutorialScreen from '@/screens/Tutorial/TutorialScreen';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -17,8 +19,71 @@ function ApplicationNavigator() {
           <Stack.Screen component={SignIn} name={Paths.SignIn} />
           <Stack.Screen component={SignUp} name={Paths.SignUp} />
           <Stack.Screen component={Home} name={Paths.Home} />
+          <Stack.Screen component={TutorialScreen} name={Paths.Tutorial} />
+          <Stack.Screen component={EditProfile} name={Paths.EditProfile} />
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast
+        config={{
+          success: (props) => (
+            <BaseToast
+              {...props}
+              style={{
+                borderLeftColor: '#10B981',
+                backgroundColor: '#262251',
+              }}
+              contentContainerStyle={{ paddingHorizontal: 15 }}
+              text1Style={{
+                fontSize: 15,
+                fontWeight: '600',
+                color: 'white',
+              }}
+              text2Style={{
+                fontSize: 13,
+                color: 'white',
+              }}
+            />
+          ),
+          error: (props) => (
+            <ErrorToast
+              {...props}
+              style={{
+                borderLeftColor: '#EF4444',
+                backgroundColor: '#262251',
+              }}
+              contentContainerStyle={{ paddingHorizontal: 15 }}
+              text1Style={{
+                fontSize: 15,
+                fontWeight: '600',
+                color: 'white', //
+              }}
+              text2Style={{
+                fontSize: 13,
+                color: 'white', //
+              }}
+            />
+          ),
+          info: (props) => (
+            <ErrorToast
+              {...props}
+              style={{
+                borderLeftColor: '#50BBE9',
+                backgroundColor: '#262251',
+              }}
+              contentContainerStyle={{ paddingHorizontal: 15 }}
+              text1Style={{
+                fontSize: 15,
+                fontWeight: '600',
+                color: 'white',
+              }}
+              text2Style={{
+                fontSize: 13,
+                color: 'white',
+              }}
+            />
+          ),
+        }}
+      />
     </SafeAreaProvider>
   );
 }

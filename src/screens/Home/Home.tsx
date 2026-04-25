@@ -4,34 +4,45 @@ import { useTheme } from '@/theme/hooks/useTheme';
 import { HomeHeader } from '@/components/organisms/HomeHeader';
 import { WelcomeMessage } from '@/components/organisms/WelcomeMessage';
 import { MenuButton } from '@/components/molecules/MenuButton';
+import { useNavigation } from '@react-navigation/native';
+import { Paths } from '@/navigation/paths';
+import type { RootScreenProps } from '@/navigation/types';
+import { AstronautIcon } from '@/components/svg/svgIcons'; // Importe o componente
 
 export default function HomeScreen() {
   const { layout, colors, spacing, gutters } = useTheme();
+  const navigation = useNavigation<RootScreenProps<Paths.Home>['navigation']>();
 
   const menuItems = [
     {
-      title: 'Alterar personagem',
-      image: require('@/assets/images/characters/green.webp'),
+      title: 'Editar perfil',
+      icon: <AstronautIcon color="#10B981" size={80} />, // Verde
+      onPress: () => navigation.navigate(Paths.EditProfile),
     },
     {
       title: 'Encontrar partida',
-      image: require('@/assets/images/characters/blue.webp'),
+      icon: <AstronautIcon color="#3B82F6" size={80} />, // Azul
+      onPress: () => null,
     },
     {
       title: 'Criar partida',
-      image: require('@/assets/images/characters/pink.webp'),
+      icon: <AstronautIcon color="#E91E63" size={80} />, // Rosa
+      onPress: () => null,
     },
     {
       title: 'Tutoriais',
-      image: require('@/assets/images/characters/purple.webp'),
+      icon: <AstronautIcon color="#A855F7" size={80} />, // Roxo
+      onPress: () => navigation.navigate(Paths.Tutorial),
     },
     {
       title: 'Recompensas diárias',
-      image: require('@/assets/images/characters/red.webp'),
+      icon: <AstronautIcon color="#EF4444" size={80} />, // Vermelho
+      onPress: () => null,
     },
     {
       title: 'Missões',
-      image: require('@/assets/images/characters/black.webp'),
+      icon: <AstronautIcon color="#374151" size={80} />, // Preto/Cinza
+      onPress: () => null,
     },
   ];
 
@@ -55,8 +66,8 @@ export default function HomeScreen() {
               <MenuButton
                 key={item.title}
                 title={item.title}
-                characterImage={item.image}
-                onPress={() => null}
+                icon={item.icon} // Passe o icon em vez de characterImage
+                onPress={item.onPress}
               />
             ))}
           </View>

@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { Text } from '@/components/atoms/Text';
+import { storage } from '@/services/storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 function WelcomeMessage() {
   const { layout, spacing, fonts } = useTheme();
+  const [username, setUsername] = useState('');
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadUsername = async () => {
+        const user = await storage.getUser();
+        if (user) {
+          setUsername(user);
+        }
+      };
+
+      loadUsername();
+    }, []),
+  );
 
   return (
     <View style={[layout.row, layout.itemsEnd, layout.selfEnd, spacing.my_lg]}>
@@ -15,7 +31,7 @@ function WelcomeMessage() {
             { fontFamily: fonts.family.aldrich, color: '#000' },
           ]}
         >
-          Bem vindo de volta tripulante!
+          Bem-vindo(a), tripulante {username}!
         </Text>
         <View style={styles.tail} />
       </View>

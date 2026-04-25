@@ -10,12 +10,25 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/navigation/types';
 import { Paths } from '@/navigation/paths';
 import { useNavigation } from '@react-navigation/native';
+import * as yup from 'yup';
+import { Controller, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { apiDev } from '@/services/api';
+import Toast from 'react-native-toast-message';
+import { useState } from 'react';
+import { storage } from '@/services/storage';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
+
+type SignInFormData = {
+  email: string;
+  password: string;
+};
 
 export default function SignIn() {
   const { colors, layout, spacing } = useTheme();
   const navigation = useNavigation<Navigation>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const shipIcon = (
     <Image
@@ -23,6 +36,48 @@ export default function SignIn() {
       style={{ width: 20, height: 20, tintColor: colors.text }}
     />
   );
+
+  const schema = yup.object().shape({
+    email: yup.string().required('Campo Obrigatório').email('E-mail inválido'),
+    password: yup.string().required('Campo Obrigatório'),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const handleSignIn = (data: SignInFormData) => {
+    setIsLoading(true);
+    apiDev
+      .post('/user/login', data)
+      .then(async (resp) => {
+        const { accessToken, username, id } = resp.data;
+
+        await storage.saveToken(accessToken);
+        await storage.saveUser(username);
+        await storage.saveUserId(id);
+
+        setIsLoading(false);
+
+        navigation.navigate(Paths.Home);
+        Toast.show({
+          type: 'success',
+          text1: 'Bem-vindo(a) a bordo!',
+          text2: 'Agora é só aproveitar o app.',
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        Toast.show({
+          type: 'error',
+          text1: 'Login inválido.',
+          text2: 'Confira as informações e tente novamente.',
+        });
+        setIsLoading(false);
+      });
+  };
 
   return (
     <SpaceBackgroundWrapper>
@@ -33,8 +88,9 @@ export default function SignIn() {
             footer={
               <View style={[spacing.mt_xl, layout.itemsCenter, { gap: 12 }]}>
                 <Button
-                  title="Entrar"
-                  onPress={() => navigation.navigate(Paths.Home)}
+                  title={isLoading ? 'Entrando' : 'Entrar'}
+                  onPress={handleSubmit(handleSignIn)}
+                  disabled={isLoading}
                 />
                 <View
                   style={{
@@ -50,16 +106,36 @@ export default function SignIn() {
               </View>
             }
           >
-            <Input
-              placeholder="Usuário ou E-mail"
-              withCustomFormat
-              rightIcon={shipIcon}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="E-mail"
+                  withCustomFormat
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.email?.message}
+                  rightIcon={shipIcon}
+                />
+              )}
             />
-            <Input
-              placeholder="Senha"
-              secureTextEntry
-              withCustomFormat
-              rightIcon={shipIcon}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="Senha"
+                  withCustomFormat
+                  secureTextEntry
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.password?.message}
+                  rightIcon={shipIcon}
+                />
+              )}
             />
             <View style={layout.selfStart}>
               <Link style={[spacing.mr_sm, spacing.ml_lg]}>
