@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getBaseURL = () => {
-  const FORCE_PROD = false; // ⚠️ TEMPORÁRIO: true = usa produção localmente, false = usa dev
+  const FORCE_PROD = true; // ⚠️ TEMPORÁRIO: true = usa produção localmente, false = usa dev
 
   if (!__DEV__ || FORCE_PROD) {
     return 'https://gargantua.azurewebsites.net/api';
