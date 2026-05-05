@@ -3,39 +3,59 @@ import {
   TouchableOpacity,
   Image,
   View,
+  Text,
+  Dimensions,
   type ImageSourcePropType,
   type TouchableOpacityProps,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
-import { Text } from '@/components/atoms/Text';
+import { Text as ThemeText } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = (SCREEN_WIDTH - 32 - 12) / 2;
 
 type MenuButtonProps = {
   title: string;
   characterImage?: ImageSourcePropType;
   icon?: React.ReactNode;
-} & TouchableOpacityProps;
+  style?: StyleProp<ViewStyle>;
+  comingSoon?: boolean;
+} & Omit<TouchableOpacityProps, 'style'>;
 
-function MenuButton({ title, characterImage, icon, ...props }: MenuButtonProps) {
-  const { colors, fonts, gutters, layout, spacing } = useTheme();
+function MenuButton({ title, characterImage, icon, style, comingSoon, ...props }: MenuButtonProps) {
+  const { colors, fonts, gutters } = useTheme();
 
   return (
     <TouchableOpacity
-      style={{
-        ...layout.itemsCenter,
-        ...layout.justifyBetween,
-        ...spacing.py_md,
-        width: '45%',
-        minWidth: 130,
-        aspectRatio: 1,
-
-        backgroundColor: colors.surface,
-        borderRadius: gutters.md,
-        borderWidth: 1,
-        borderColor: '#2A2A2A',
-      }}
+      style={[
+        {
+          width: CARD_WIDTH,
+          height: CARD_WIDTH,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          paddingHorizontal: 8,
+          backgroundColor: colors.surface,
+          borderRadius: gutters.md,
+          borderWidth: 1,
+          borderColor: '#2A2A2A',
+        },
+        style,
+      ]}
+      activeOpacity={comingSoon ? 0.4 : 0.7}
       {...props}
     >
-      <Text
+      {icon ? (
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+          {icon}
+        </View>
+      ) : characterImage ? (
+        <Image source={characterImage} style={{ width: 48, height: 48 }} resizeMode="contain" />
+      ) : null}
+
+      <ThemeText
         style={{
           fontFamily: fonts.family.aldrich,
           fontSize: fonts.size.md,
@@ -46,19 +66,25 @@ function MenuButton({ title, characterImage, icon, ...props }: MenuButtonProps) 
         ellipsizeMode="clip"
       >
         {title}
-      </Text>
-      
-      {icon ? (
-        <View style={{ width: '60%', height: '60%', justifyContent: 'center', alignItems: 'center' }}>
-          {icon}
+      </ThemeText>
+
+      {comingSoon && (
+        <View style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          backgroundColor: 'rgba(59,130,246,0.15)',
+          borderWidth: 1,
+          borderColor: 'rgba(59,130,246,0.35)',
+          borderRadius: 999,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+        }}>
+          <Text style={{ fontSize: 9, color: '#60A5FA', fontWeight: '700', letterSpacing: 0.5 }}>
+            EM BREVE
+          </Text>
         </View>
-      ) : characterImage ? (
-        <Image
-          source={characterImage}
-          style={{ width: '60%', height: '60%' }}
-          resizeMode="contain"
-        />
-      ) : null}
+      )}
     </TouchableOpacity>
   );
 }

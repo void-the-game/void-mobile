@@ -15,7 +15,7 @@ export default function HomeHeader() {
           layout.row,
           layout.itemsCenter,
           layout.justifyBetween,
-          spacing.py_2xl,
+          { paddingVertical: 12 },
         ]}
       >
         <TouchableOpacity onPress={() => setMenuVisible(true)}>
