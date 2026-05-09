@@ -59,14 +59,24 @@ export default function SignIn() {
         await storage.saveUser(username);
         await storage.saveUserId(id);
 
-        setIsLoading(false);
-
-        navigation.navigate(Paths.Home);
-        Toast.show({
-          type: 'success',
-          text1: 'Bem-vindo(a) a bordo!',
-          text2: 'Agora é só aproveitar o app.',
-        });
+        try {
+          // Checa se o usuário já tem um profile
+          await apiDev.get(`/profile/${id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          // Se rodou sem erro (status 200), ele já tem o profile, vai pra Home direto
+          setIsLoading(false);
+          navigation.navigate(Paths.Home);
+          Toast.show({
+            type: 'success',
+            text1: 'Bem-vindo(a) a bordo!',
+            text2: 'Agora é só aproveitar o app.',
+          });
+        } catch (profileError) {
+          // Se falhou (teoricamente 404), ele manda pra criação de perfil
+          setIsLoading(false);
+          navigation.navigate(Paths.SetupProfile);
+        }
       })
       .catch((err) => {
         console.error(err);

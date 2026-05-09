@@ -1,13 +1,18 @@
-import React from 'react';
-import { View, ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { HomeHeader } from '@/components/organisms/HomeHeader';
 import { WelcomeMessage } from '@/components/organisms/WelcomeMessage';
 import { MenuButton } from '@/components/molecules/MenuButton';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Paths } from '@/navigation/paths';
 import type { RootScreenProps } from '@/navigation/types';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import {
@@ -17,6 +22,9 @@ import {
   RewardsIcon,
   MissionsIcon,
 } from '@/components/svg/menuIcons';
+import { BottomNav, BottomTab } from '@/components/organisms/BottomNav';
+import { storage } from '@/services/storage';
+import { apiDev } from '@/services/api';
 
 // ── Barra de nível ─────────────────────────────────────────────
 function LevelBar({ level = 7, current = 650, max = 1000 }) {
@@ -25,7 +33,9 @@ function LevelBar({ level = 7, current = 650, max = 1000 }) {
     <View style={levelStyles.wrapper}>
       <View style={levelStyles.labelRow}>
         <Text style={levelStyles.label}>Nível {level}</Text>
-        <Text style={levelStyles.xp}>{current} / {max} XP</Text>
+        <Text style={levelStyles.xp}>
+          {current} / {max} XP
+        </Text>
       </View>
       <View style={levelStyles.track}>
         <View style={[levelStyles.fill, { width: `${pct}%` as any }]} />
@@ -36,7 +46,11 @@ function LevelBar({ level = 7, current = 650, max = 1000 }) {
 
 const levelStyles = StyleSheet.create({
   wrapper: { marginTop: 8, marginBottom: 16, paddingHorizontal: 16 },
-  labelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   label: { fontSize: 12, fontWeight: '600', color: '#60A5FA' },
   xp: { fontSize: 11, color: '#94A3B8' },
   track: {
@@ -48,64 +62,6 @@ const levelStyles = StyleSheet.create({
   fill: { height: '100%', borderRadius: 999, backgroundColor: '#3B82F6' },
 });
 
-// ── Menu inferior ──────────────────────────────────────────────
-type BottomTab = 'home' | 'friends' | 'ranking' | 'profile';
-
-const TABS: { key: BottomTab; label: string; icon: string }[] = [
-  { key: 'home',    label: 'Início',  icon: 'home-outline' },
-  { key: 'friends', label: 'Amigos',  icon: 'people-outline' },
-  { key: 'ranking', label: 'Ranking', icon: 'trophy-outline' },
-  { key: 'profile', label: 'Perfil',  icon: 'person-outline' },
-];
-
-function BottomNav({
-  active,
-  onChange,
-  backgroundColor,
-}: {
-  active: BottomTab;
-  onChange: (tab: BottomTab) => void;
-  backgroundColor: string;
-}) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[navStyles.bar, { backgroundColor, paddingBottom: insets.bottom || 16 }]}>
-      {TABS.map((t) => {
-        const focused = active === t.key;
-        return (
-          <TouchableOpacity
-            key={t.key}
-            style={navStyles.tab}
-            onPress={() => onChange(t.key)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: focused }}
-          >
-            <Ionicons
-              name={(focused ? t.icon.replace('-outline', '') : t.icon) as any}
-              size={22}
-              color={focused ? '#3B82F6' : '#64748B'}
-            />
-            <Text style={[navStyles.label, focused && navStyles.labelActive]}>
-              {t.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
-const navStyles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(59,130,246,0.18)',
-    paddingTop: 8,
-  },
-  tab: { flex: 1, alignItems: 'center', gap: 3 },
-  label: { fontSize: 11, color: '#64748B' },
-  labelActive: { color: '#3B82F6', fontWeight: '600' },
-});
 
 // ── Tela ───────────────────────────────────────────────────────
 type MenuItem = {
@@ -119,7 +75,31 @@ export default function HomeScreen() {
   const { layout, colors } = useTheme();
   const navigation = useNavigation<RootScreenProps<Paths.Home>['navigation']>();
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = React.useState<BottomTab>('home');
+  const [activeTab, setActiveTab] = useState<BottomTab>('home');
+  const [profile, setProfile] = useState<any>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const userId = await storage.getUserId();
+          const token = await storage.getToken();
+          if (!userId || !token) return;
+
+          const response = await apiDev.get(`/profile/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.data.success && response.data.profile) {
+            setProfile(response.data.profile);
+          }
+        } catch (error: any) {
+          console.log('Error fetching profile in Home:', error.message);
+        }
+      };
+      fetchProfile();
+    }, [])
+  );
 
   const cardStyle = {
     backgroundColor: 'rgba(59,130,246,0.08)',
@@ -172,6 +152,14 @@ export default function HomeScreen() {
     item.onPress();
   };
 
+  const handleTabChange = (tab: BottomTab) => {
+    if (tab === 'profile') {
+      navigation.navigate(Paths.EditProfile);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
   return (
     <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
       <ScrollView
@@ -182,8 +170,8 @@ export default function HomeScreen() {
         }}
       >
         <HomeHeader />
-        <WelcomeMessage />
-        <LevelBar level={7} current={650} max={1000} />
+        <WelcomeMessage avatar={profile?.avatar} username={profile?.nickname} />
+        <LevelBar level={profile?.level ?? 1} current={profile?.points ?? 0} max={1000} />
 
         <View
           style={{
@@ -201,10 +189,7 @@ export default function HomeScreen() {
               icon={item.icon}
               onPress={() => handlePress(item)}
               comingSoon={item.disabled}
-              style={[
-                cardStyle,
-                item.disabled && { opacity: 0.45 },
-              ]}
+              style={[cardStyle, item.disabled && { opacity: 0.45 }]}
             />
           ))}
         </View>
@@ -212,7 +197,7 @@ export default function HomeScreen() {
 
       <BottomNav
         active={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
         backgroundColor={colors.background}
       />
     </View>

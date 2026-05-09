@@ -1,39 +1,53 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { storage } from '@/services/storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { AstronautIcon } from '@/components/svg/svgIcons';
 
-function WelcomeMessage() {
+interface WelcomeMessageProps {
+  avatar?: string;
+  username?: string;
+}
+
+function WelcomeMessage({ avatar, username: propUsername }: WelcomeMessageProps) {
   const { fonts } = useTheme();
-  const [username, setUsername] = useState('');
+  const [localUsername, setLocalUsername] = useState('');
 
   useFocusEffect(
     React.useCallback(() => {
       const loadUsername = async () => {
         const user = await storage.getUser();
-        if (user) setUsername(user);
+        if (user) setLocalUsername(user);
       };
       loadUsername();
     }, []),
   );
 
+  const displayUsername = propUsername || localUsername || 'Tripulante';
+
   return (
     <View style={styles.wrapper}>
-      <AstronautIcon
-        color="#3B82F6"
-        armColor="#093075"
-        armStrokeColor="#3B82F6"
-        size={64}
-      />
+      {avatar ? (
+        <Image 
+          source={{ uri: avatar }} 
+          style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.2)' }} 
+        />
+      ) : (
+        <AstronautIcon
+          color="#3B82F6"
+          armColor="#093075"
+          armStrokeColor="#3B82F6"
+          size={64}
+        />
+      )}
       <View style={styles.bubbleWrapper}>
         <View style={styles.bubble}>
           <Text style={[styles.greeting, { fontFamily: fonts.family.aldrich }]}>
             Bem-vindo(a) de volta,
           </Text>
           <Text style={[styles.username, { fontFamily: fonts.family.aldrich }]}>
-            {username || 'Tripulante'} 👾
+            {displayUsername} 👾
           </Text>
           <View style={styles.tail} />
         </View>

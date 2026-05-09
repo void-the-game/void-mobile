@@ -4,4 +4,5 @@ export const enum Paths {
   SignUp = 'SignUp',
   Tutorial = 'Tutorial',
   EditProfile = 'EditProfile',
+  SetupProfile = 'SetupProfile',
 }

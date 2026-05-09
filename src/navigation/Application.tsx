@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Paths } from '@/navigation/paths';
-import { Home, SignIn, SignUp, EditProfile } from '@/screens';
+import { Home, SignIn, SignUp, EditProfile, SetupProfile } from '@/screens';
 import TutorialScreen from '@/screens/Tutorial/TutorialScreen';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
@@ -21,6 +21,7 @@ function ApplicationNavigator() {
           <Stack.Screen component={Home} name={Paths.Home} />
           <Stack.Screen component={TutorialScreen} name={Paths.Tutorial} />
           <Stack.Screen component={EditProfile} name={Paths.EditProfile} />
+          <Stack.Screen component={SetupProfile} name={Paths.SetupProfile} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast

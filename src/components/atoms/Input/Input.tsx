@@ -27,12 +27,23 @@ export default function Input({
 }: InputProps) {
   const { colors, fonts, gutters, layout, spacing } = useTheme();
   const [width, setWidth] = useState(0);
+  const [contentHeight, setContentHeight] = useState(INPUT_HEIGHT);
+
+  const finalHeight = props.multiline
+    ? Math.max(INPUT_HEIGHT, contentHeight)
+    : INPUT_HEIGHT;
 
   const textInputStyle: StyleProp<TextStyle> = {
     flex: 1,
     color: colors.text,
     fontFamily: fonts.family.aldrich,
     fontSize: fonts.size.md,
+    ...(props.multiline
+      ? {
+          textAlignVertical: 'center',
+          marginTop: -6, // Puxa o input multiline pra cima pra casar exatamente com o simples
+        }
+      : {}),
   };
 
   return (
@@ -40,14 +51,14 @@ export default function Input({
       <View
         style={[
           {
-            height: INPUT_HEIGHT,
+            height: finalHeight,
           },
         ]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
       >
         {withCustomFormat ? (
           <View style={styles.absFill}>
-            {width > 0 && <InputShape width={width} height={INPUT_HEIGHT} />}
+            {width > 0 && <InputShape width={width} height={finalHeight} />}
           </View>
         ) : (
           <View
@@ -64,12 +75,20 @@ export default function Input({
             layout.itemsCenter,
             layout.justifyCenter,
             spacing.px_xl,
+            styles.absFill,
           ]}
         >
           <TextInput
             style={textInputStyle}
             placeholderTextColor={colors.textSecondary}
             selectionColor={colors.accent}
+            multiline={props.multiline}
+            onContentSizeChange={(e) => {
+              if (props.multiline) {
+                setContentHeight(e.nativeEvent.contentSize.height);
+              }
+              props.onContentSizeChange && props.onContentSizeChange(e);
+            }}
             {...props}
           />
 
