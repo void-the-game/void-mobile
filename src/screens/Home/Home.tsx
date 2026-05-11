@@ -1,78 +1,205 @@
-import React from 'react';
-import { View, ScrollView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { HomeHeader } from '@/components/organisms/HomeHeader';
 import { WelcomeMessage } from '@/components/organisms/WelcomeMessage';
 import { MenuButton } from '@/components/molecules/MenuButton';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Paths } from '@/navigation/paths';
 import type { RootScreenProps } from '@/navigation/types';
-import { AstronautIcon } from '@/components/svg/svgIcons'; // Importe o componente
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+import {
+  FindMatchIcon,
+  CreateMatchIcon,
+  TutorialsIcon,
+  RewardsIcon,
+  MissionsIcon,
+} from '@/components/svg/menuIcons';
+import { BottomNav, BottomTab } from '@/components/organisms/BottomNav';
+import { storage } from '@/services/storage';
+import { apiDev } from '@/services/api';
+
+// ── Barra de nível ─────────────────────────────────────────────
+function LevelBar({ level = 7, current = 650, max = 1000 }) {
+  const pct = Math.min((current / max) * 100, 100);
+  return (
+    <View style={levelStyles.wrapper}>
+      <View style={levelStyles.labelRow}>
+        <Text style={levelStyles.label}>Nível {level}</Text>
+        <Text style={levelStyles.xp}>
+          {current} / {max} XP
+        </Text>
+      </View>
+      <View style={levelStyles.track}>
+        <View style={[levelStyles.fill, { width: `${pct}%` as any }]} />
+      </View>
+    </View>
+  );
+}
+
+const levelStyles = StyleSheet.create({
+  wrapper: { marginTop: 8, marginBottom: 16, paddingHorizontal: 16 },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  label: { fontSize: 12, fontWeight: '600', color: '#60A5FA' },
+  xp: { fontSize: 11, color: '#94A3B8' },
+  track: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(59,130,246,0.15)',
+    overflow: 'hidden',
+  },
+  fill: { height: '100%', borderRadius: 999, backgroundColor: '#3B82F6' },
+});
+
+
+// ── Tela ───────────────────────────────────────────────────────
+type MenuItem = {
+  title: string;
+  icon: React.ReactNode;
+  onPress: () => void;
+  disabled: boolean;
+};
 
 export default function HomeScreen() {
-  const { layout, colors, spacing, gutters } = useTheme();
+  const { layout, colors } = useTheme();
   const navigation = useNavigation<RootScreenProps<Paths.Home>['navigation']>();
+  const insets = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState<BottomTab>('home');
+  const [profile, setProfile] = useState<any>(null);
 
-  const menuItems = [
-    {
-      title: 'Editar perfil',
-      icon: <AstronautIcon color="#10B981" size={80} />, // Verde
-      onPress: () => navigation.navigate(Paths.EditProfile),
-    },
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const userId = await storage.getUserId();
+          const token = await storage.getToken();
+          if (!userId || !token) return;
+
+          const response = await apiDev.get(`/profile/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (response.data.success && response.data.profile) {
+            setProfile(response.data.profile);
+          }
+        } catch (error: any) {
+          console.log('Error fetching profile in Home:', error.message);
+        }
+      };
+      fetchProfile();
+    }, [])
+  );
+
+  const cardStyle = {
+    backgroundColor: 'rgba(59,130,246,0.08)',
+    borderColor: 'rgba(59,130,246,0.22)',
+  };
+
+  const menuItems: MenuItem[] = [
     {
       title: 'Encontrar partida',
-      icon: <AstronautIcon color="#3B82F6" size={80} />, // Azul
+      icon: <FindMatchIcon color="#3B82F6" size={48} />,
       onPress: () => null,
+      disabled: false,
     },
     {
       title: 'Criar partida',
-      icon: <AstronautIcon color="#E91E63" size={80} />, // Rosa
+      icon: <CreateMatchIcon color="#E91E63" size={48} />,
       onPress: () => null,
+      disabled: false,
     },
     {
       title: 'Tutoriais',
-      icon: <AstronautIcon color="#A855F7" size={80} />, // Roxo
+      icon: <TutorialsIcon color="#A855F7" size={56} />,
       onPress: () => navigation.navigate(Paths.Tutorial),
+      disabled: false,
     },
     {
       title: 'Recompensas diárias',
-      icon: <AstronautIcon color="#EF4444" size={80} />, // Vermelho
+      icon: <RewardsIcon color="#F59E0B" size={48} />,
       onPress: () => null,
+      disabled: true,
     },
     {
       title: 'Missões',
-      icon: <AstronautIcon color="#374151" size={80} />, // Preto/Cinza
+      icon: <MissionsIcon color="#F59E0B" size={48} />,
       onPress: () => null,
+      disabled: true,
     },
   ];
 
+  const handlePress = (item: MenuItem) => {
+    if (item.disabled) {
+      Toast.show({
+        type: 'info',
+        text1: 'Em breve!',
+        text2: 'Desculpe, ainda estamos trabalhando nisso..',
+        visibilityTime: 2500,
+      });
+      return;
+    }
+    item.onPress();
+  };
+
+  const handleTabChange = (tab: BottomTab) => {
+    if (tab === 'profile') {
+      navigation.navigate(Paths.EditProfile);
+    } else {
+      setActiveTab(tab);
+    }
+  };
+
   return (
     <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
-      <View style={layout.flex_1}>
-        <ScrollView style={(layout.flex_1, spacing.mb_2xl, spacing.px_lg)}>
-          <HomeHeader />
-          <WelcomeMessage />
+      <ScrollView
+        style={layout.flex_1}
+        contentContainerStyle={{
+          paddingTop: insets.top + 8,
+          paddingBottom: 16,
+        }}
+      >
+        <HomeHeader />
+        <WelcomeMessage avatar={profile?.avatar} username={profile?.nickname} />
+        <LevelBar level={profile?.level ?? 1} current={profile?.points ?? 0} max={1000} />
 
-          <View
-            style={[
-              layout.row,
-              layout.wrap,
-              layout.justifyBetween,
-              spacing.px_sm,
-              { rowGap: gutters.xl },
-            ]}
-          >
-            {menuItems.map((item) => (
-              <MenuButton
-                key={item.title}
-                title={item.title}
-                icon={item.icon} // Passe o icon em vez de characterImage
-                onPress={item.onPress}
-              />
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 12,
+            paddingHorizontal: 16,
+            marginTop: 4,
+          }}
+        >
+          {menuItems.map((item) => (
+            <MenuButton
+              key={item.title}
+              title={item.title}
+              icon={item.icon}
+              onPress={() => handlePress(item)}
+              comingSoon={item.disabled}
+              style={[cardStyle, item.disabled && { opacity: 0.45 }]}
+            />
+          ))}
+        </View>
+      </ScrollView>
+
+      <BottomNav
+        active={activeTab}
+        onChange={handleTabChange}
+        backgroundColor={colors.background}
+      />
     </View>
   );
 }

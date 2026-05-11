@@ -1,72 +1,112 @@
 import React, { useState } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text, Image } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
-import { Text } from '@/components/atoms/Text';
 import { storage } from '@/services/storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { AstronautIcon } from '@/components/svg/svgIcons';
 
-function WelcomeMessage() {
-  const { layout, spacing, fonts } = useTheme();
-  const [username, setUsername] = useState('');
+interface WelcomeMessageProps {
+  avatar?: string;
+  username?: string;
+}
+
+function WelcomeMessage({ avatar, username: propUsername }: WelcomeMessageProps) {
+  const { fonts } = useTheme();
+  const [localUsername, setLocalUsername] = useState('');
 
   useFocusEffect(
     React.useCallback(() => {
       const loadUsername = async () => {
         const user = await storage.getUser();
-        if (user) {
-          setUsername(user);
-        }
+        if (user) setLocalUsername(user);
       };
-
       loadUsername();
     }, []),
   );
 
+  const displayUsername = propUsername || localUsername || 'Tripulante';
+
   return (
-    <View style={[layout.row, layout.itemsEnd, layout.selfEnd, spacing.my_lg]}>
-      <View style={styles.bubble}>
-        <Text
-          style={[
-            fonts.style.alignCenter,
-            { fontFamily: fonts.family.aldrich, color: '#000' },
-          ]}
-        >
-          Bem-vindo(a), tripulante {username}!
-        </Text>
-        <View style={styles.tail} />
+    <View style={styles.wrapper}>
+      {avatar ? (
+        <Image 
+          source={{ uri: avatar }} 
+          style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.2)' }} 
+        />
+      ) : (
+        <AstronautIcon
+          color="#3B82F6"
+          armColor="#093075"
+          armStrokeColor="#3B82F6"
+          size={64}
+        />
+      )}
+      <View style={styles.bubbleWrapper}>
+        <View style={styles.bubble}>
+          <Text style={[styles.greeting, { fontFamily: fonts.family.aldrich }]}>
+            Bem-vindo(a) de volta,
+          </Text>
+          <Text style={[styles.username, { fontFamily: fonts.family.aldrich }]}>
+            {displayUsername} 👾
+          </Text>
+          <View style={styles.tail} />
+        </View>
       </View>
-      <Image
-        source={require('@/assets/images/characters/astronaut-head.webp')}
-        style={{ width: 50, height: 50, marginLeft: 10 }}
-        resizeMode="contain"
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  bubbleWrapper: {
+    flex: 1,
+    gap: 6,
+  },
   bubble: {
-    backgroundColor: '#E0E0E0',
-    padding: 12,
+    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(59,130,246,0.35)',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     borderRadius: 12,
-    position: 'relative',
-    maxWidth: 200,
+    borderTopLeftRadius: 2,
   },
   tail: {
     position: 'absolute',
-    right: -10,
-    bottom: 5,
+    left: -8,
+    top: 12,
     width: 0,
     height: 0,
-    backgroundColor: 'transparent',
     borderStyle: 'solid',
-    borderLeftWidth: 10,
-    borderRightWidth: 10,
-    borderBottomWidth: 20,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#E0E0E0',
-    transform: [{ rotate: '60deg' }],
+    borderTopWidth: 6,
+    borderBottomWidth: 6,
+    borderRightWidth: 8,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderRightColor: 'rgba(59,130,246,0.35)',
+  },
+  greeting: {
+    fontSize: 11,
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+  },
+  username: {
+    fontSize: 15,
+    color: '#E2E8F0',
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingLeft: 2,
   },
 });
 

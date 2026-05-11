@@ -11,4 +11,5 @@ export type RootStackParamList = {
   [Paths.SignUp]: undefined;
   [Paths.Tutorial]: undefined;
   [Paths.EditProfile]: undefined;
+  [Paths.SetupProfile]: undefined;
 };
