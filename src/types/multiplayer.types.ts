@@ -2,6 +2,7 @@
 export type LobbyPlayer = {
   id: string;
   name: string;
+  avatar?: string;
   ready?: boolean;
   cardCount?: number;
   isEliminated?: boolean;
@@ -37,7 +38,7 @@ export type RoomCreatedPayload = {
 export type RoomPlayersPayload = {
   playerId: string;
   playerName?: string;
-  players: { id: string; name: string }[];
+  players: LobbyPlayer[];
 };
 
 /** card:played — log público */

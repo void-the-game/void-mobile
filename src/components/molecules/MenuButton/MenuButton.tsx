@@ -32,11 +32,12 @@ function MenuButton({ title, characterImage, icon, style, comingSoon, ...props }
       style={[
         {
           width: CARD_WIDTH,
-          height: CARD_WIDTH,
+          minHeight: CARD_WIDTH - 20,
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 8,
+          gap: 6,
           paddingHorizontal: 8,
+          paddingVertical: 10,
           backgroundColor: colors.surface,
           borderRadius: gutters.md,
           borderWidth: 1,

@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { SideMenu } from '@/components/organisms/SideMenu';
 
 export default function HomeHeader() {
-  const { colors, layout, spacing } = useTheme();
+  const { colors, layout } = useTheme();
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -15,12 +15,13 @@ export default function HomeHeader() {
           layout.row,
           layout.itemsCenter,
           layout.justifyBetween,
-          { paddingVertical: 12 },
+          { paddingVertical: 12, paddingHorizontal: 16 },
         ]}
       >
         <TouchableOpacity onPress={() => setMenuVisible(true)}>
           <Icon name="menu" size={28} color={colors.text} />
         </TouchableOpacity>
+
         <TouchableOpacity>
           <Icon name="bell" size={24} color={colors.text} />
         </TouchableOpacity>
