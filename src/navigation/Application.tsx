@@ -7,6 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Paths } from '@/navigation/paths';
 import { Home, SignIn, SignUp, EditProfile, SetupProfile } from '@/screens';
 import TutorialScreen from '@/screens/Tutorial/TutorialScreen';
+import LobbyScreen from '@/screens/Lobby/LobbyScreen';
+import MatchScreen from '@/screens/Match/MatchScreen';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -22,6 +24,8 @@ function ApplicationNavigator() {
           <Stack.Screen component={TutorialScreen} name={Paths.Tutorial} />
           <Stack.Screen component={EditProfile} name={Paths.EditProfile} />
           <Stack.Screen component={SetupProfile} name={Paths.SetupProfile} />
+          <Stack.Screen component={LobbyScreen} name={Paths.Lobby} />
+          <Stack.Screen component={MatchScreen} name={Paths.Match} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast
@@ -56,11 +60,11 @@ function ApplicationNavigator() {
               text1Style={{
                 fontSize: 15,
                 fontWeight: '600',
-                color: 'white', //
+                color: 'white',
               }}
               text2Style={{
                 fontSize: 13,
-                color: 'white', //
+                color: 'white',
               }}
             />
           ),

@@ -110,13 +110,13 @@ export default function HomeScreen() {
     {
       title: 'Encontrar partida',
       icon: <FindMatchIcon color="#3B82F6" size={48} />,
-      onPress: () => null,
+      onPress: () => navigation.navigate(Paths.Lobby),
       disabled: false,
     },
     {
       title: 'Criar partida',
       icon: <CreateMatchIcon color="#E91E63" size={48} />,
-      onPress: () => null,
+      onPress: () => navigation.navigate(Paths.Lobby),
       disabled: false,
     },
     {

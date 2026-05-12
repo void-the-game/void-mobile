@@ -5,4 +5,8 @@ export const enum Paths {
   Tutorial = 'Tutorial',
   EditProfile = 'EditProfile',
   SetupProfile = 'SetupProfile',
+
+   // Multiplayer
+  Lobby = 'Lobby',
+  Match = 'Match',
 }

@@ -12,4 +12,8 @@ export type RootStackParamList = {
   [Paths.Tutorial]: undefined;
   [Paths.EditProfile]: undefined;
   [Paths.SetupProfile]: undefined;
+
+   // Multiplayer
+  Lobby: undefined;
+  Match: { roomId: string };
 };
