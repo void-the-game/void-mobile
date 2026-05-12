@@ -15,26 +15,26 @@ import type {
 
 // ─── Eventos (fonte: socket-events.ts do backend) ─────────────────────────────
 const EV = {
-  ROOM_CREATE:         'room:create',
-  ROOM_JOIN:           'room:join',
-  ROOM_LEAVE:          'room:leave',
-  ROOM_CREATED:        'room:created',
-  ROOM_PLAYER_JOINED:  'room:player_joined',
-  ROOM_PLAYER_LEFT:    'room:player_left',
-  MATCH_START:         'match:start',
-  MATCH_END:           'match:end',
-  CARD_PLAY:           'card:play',
-  CARD_PLAYED:         'card:played',
-  TURN_PASS:           'turn:pass',
-  STATE_UPDATE:        'state:update',
-  STATE_REQUEST:       'state:request',
+  ROOM_CREATE: 'room:create',
+  ROOM_JOIN: 'room:join',
+  ROOM_LEAVE: 'room:leave',
+  ROOM_CREATED: 'room:created',
+  ROOM_PLAYER_JOINED: 'room:player_joined',
+  ROOM_PLAYER_LEFT: 'room:player_left',
+  MATCH_START: 'match:start',
+  MATCH_END: 'match:end',
+  CARD_PLAY: 'card:play',
+  CARD_PLAYED: 'card:played',
+  TURN_PASS: 'turn:pass',
+  STATE_UPDATE: 'state:update',
+  STATE_REQUEST: 'state:request',
   INTERRUPT_AVAILABLE: 'interrupt:available',
-  INTERRUPT_PLAY:      'interrupt:play',
-  DISCARD_REQUIRED:    'discard:required',
-  DISCARD_SUBMIT:      'discard:submit',
-  PLAYER_ELIMINATED:   'player:eliminated',
-  PLAYER_RETURNED:     'player:returned',
-  ERROR:               'error',
+  INTERRUPT_PLAY: 'interrupt:play',
+  DISCARD_REQUIRED: 'discard:required',
+  DISCARD_SUBMIT: 'discard:submit',
+  PLAYER_ELIMINATED: 'player:eliminated',
+  PLAYER_RETURNED: 'player:returned',
+  ERROR: 'error',
 } as const;
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
@@ -79,29 +79,29 @@ export function useMultiplayerRoom() {
     const s = socketRef.current;
     s.connect();
 
-    s.on('connect',    () => set({ connected: true }));
+    s.on('connect', () => set({ connected: true }));
     s.on('disconnect', () => set({ connected: false }));
 
     // room:created → { roomId, code }
     s.on(EV.ROOM_CREATED, (payload: RoomCreatedPayload) => {
       set({
-        roomId:   payload.roomId,
+        roomId: payload.roomId,
         roomCode: payload.code,
-        phase:    'waiting',
+        phase: 'waiting',
       });
     });
 
     // room:player_joined → { playerId, playerName, players[] }
     s.on(EV.ROOM_PLAYER_JOINED, (payload: RoomPlayersPayload) => {
       set({
-        players: payload.players.map(p => ({ id: p.id, name: p.name })),
+        players: payload.players,
       });
     });
 
     // room:player_left → { playerId, players[] }
     s.on(EV.ROOM_PLAYER_LEFT, (payload: RoomPlayersPayload) => {
       set({
-        players: payload.players.map(p => ({ id: p.id, name: p.name })),
+        players: payload.players,
       });
     });
 
@@ -160,7 +160,7 @@ export function useMultiplayerRoom() {
       s.off('disconnect');
       disconnectSocket();
     };
-  }, []);
+  }, [set]);
 
   // ─── Ações ────────────────────────────────────────────────────────────────
 
@@ -208,7 +208,7 @@ export function useMultiplayerRoom() {
     if (!state.roomId) return;
     socketRef.current.emit(EV.DISCARD_SUBMIT, { roomId: state.roomId, cardIds });
     set({ forcedDiscard: null });
-  }, [state.roomId]);
+  }, [state.roomId, set]);
 
   /** Solicita estado atual (reconexão). Payload: { roomId } */
   const syncState = useCallback(() => {
@@ -223,8 +223,8 @@ export function useMultiplayerRoom() {
     setState(INITIAL);
   }, [state.roomId]);
 
-  const dismissInterrupt = useCallback(() => set({ interrupt: null }), []);
-  const dismissError     = useCallback(() => set({ error: null }),     []);
+  const dismissInterrupt = useCallback(() => set({ interrupt: null }), [set]);
+  const dismissError = useCallback(() => set({ error: null }), [set]);
 
   return {
     ...state,
