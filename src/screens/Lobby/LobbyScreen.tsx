@@ -144,7 +144,6 @@ export default function LobbyScreen() {
     const [activeTab, setActiveTab] = useState<BottomTab>('home');
 
     const [step, setStep] = useState<LobbyStep>('browser');
-    const [isHost, setIsHost] = useState(false);
     const [playerName, setPlayerName] = useState('');
     const [playerAvatar, setPlayerAvatar] = useState<string | undefined>();
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -165,8 +164,11 @@ export default function LobbyScreen() {
         createRoom,
         joinRoom,
         startGame,
+        leaveRoom,
         dismissError,
     } = useMultiplayerRoom();
+
+    const isHost = players.length > 0 && players[0].name === playerName;
 
     useFocusEffect(
         useCallback(() => {
@@ -237,7 +239,6 @@ export default function LobbyScreen() {
     const handleTabChange = (tab: BottomTab) => {
         if (tab === 'home') {
             setStep('browser');
-            setIsHost(false);
             setJoinCode('');
             setJoinModalVisible(false);
             navigation.navigate(Paths.Home as any);
@@ -262,9 +263,8 @@ export default function LobbyScreen() {
             return;
         }
 
-        setIsHost(true);
         setCreatingRoom(true);
-        createRoom(playerName.trim());
+        createRoom(playerName.trim(), currentUserId);
     };
 
     const handleJoin = () => {
@@ -287,7 +287,7 @@ export default function LobbyScreen() {
         }
 
         setJoiningRoom(true);
-        joinRoom(joinCode.trim().toUpperCase(), playerName.trim());
+        joinRoom(joinCode.trim().toUpperCase(), playerName.trim(), currentUserId);
         setJoinModalVisible(false);
     };
 
@@ -550,7 +550,10 @@ export default function LobbyScreen() {
 
                     <View style={styles.pageTitleRow}>
                         <TouchableOpacity
-                            onPress={() => setStep('browser')}
+                            onPress={() => {
+                                leaveRoom();
+                                setStep('browser');
+                            }}
                             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                         >
                             <Feather name="arrow-left" size={22} color={colors.text} />

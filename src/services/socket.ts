@@ -41,6 +41,10 @@ export function getSocket(): Socket {
     socket = io(getSocketURL(), {
       autoConnect: false,
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
     });
   }
   return socket;

@@ -50,6 +50,9 @@ type MultiplayerState = {
   forcedDiscard: ForcedDiscardPayload | null;
   gameOver: GameOverPayload | null;
   error: string | null;
+  joiningRoomCode?: string | null;
+  currentPlayerName?: string | null;
+  currentUserId?: string | null;
 };
 
 const INITIAL: MultiplayerState = {
@@ -69,7 +72,12 @@ const INITIAL: MultiplayerState = {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 export function useMultiplayerRoom() {
   const [state, setState] = useState<MultiplayerState>(INITIAL);
+  const stateRef = useRef(state);
   const socketRef = useRef(getSocket());
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const set = useCallback((partial: Partial<MultiplayerState>) => {
     setState(prev => ({ ...prev, ...partial }));
@@ -77,9 +85,33 @@ export function useMultiplayerRoom() {
 
   useEffect(() => {
     const s = socketRef.current;
-    s.connect();
+    if (!s.connected) {
+      s.connect();
+    }
 
-    s.on('connect', () => set({ connected: true }));
+    s.on('connect', () => {
+      set({ connected: true });
+      const current = stateRef.current;
+      
+      // @ts-ignore - socket.recovered flag do socket.io-client para CSR
+      if (s.recovered) {
+        console.log('[socket] Sessão recuperada — mantendo estado anterior');
+        return;
+      }
+
+      console.log('[socket] Nova sessão — fluxo normal de conexão/fallback');
+
+      // Auto-reconnect flow (fallback): se a gente já tinha uma sala e desconectou por muito tempo
+      if (current.roomCode && current.currentPlayerName) {
+         console.log('[Socket] Reconectado sem CSR! Tentando voltar para a sala:', current.roomCode);
+         s.emit(EV.ROOM_JOIN, { 
+           code: current.roomCode, 
+           playerName: current.currentPlayerName, 
+           userId: current.currentUserId 
+         });
+      }
+    });
+    
     s.on('disconnect', () => set({ connected: false }));
 
     // room:created → { roomId, code }
@@ -95,6 +127,14 @@ export function useMultiplayerRoom() {
     s.on(EV.ROOM_PLAYER_JOINED, (payload: RoomPlayersPayload) => {
       set({
         players: payload.players,
+        phase: 'waiting'
+      });
+      // Fallback para caso o roomCode não tenha sido setado corretamente no callback do joinRoom
+      setState(prev => {
+        if (!prev.roomCode && prev.joiningRoomCode) {
+          return { ...prev, roomCode: prev.joiningRoomCode };
+        }
+        return prev;
       });
     });
 
@@ -164,15 +204,22 @@ export function useMultiplayerRoom() {
 
   // ─── Ações ────────────────────────────────────────────────────────────────
 
-  /** Cria sala. Payload: { playerName } */
-  const createRoom = useCallback((playerName: string) => {
-    socketRef.current.emit(EV.ROOM_CREATE, { playerName });
-  }, []);
+  /** Cria sala. Payload: { playerName, userId } */
+  const createRoom = useCallback((playerName: string, userId?: string | null) => {
+    set({ currentPlayerName: playerName, currentUserId: userId });
+    socketRef.current.emit(EV.ROOM_CREATE, { playerName, userId });
+  }, [set]);
 
-  /** Entra na sala. Payload: { code, playerName } */
-  const joinRoom = useCallback((code: string, playerName: string) => {
-    socketRef.current.emit(EV.ROOM_JOIN, { code, playerName });
-  }, []);
+  /** Entra na sala. Payload: { code, playerName, userId } */
+  const joinRoom = useCallback((code: string, playerName: string, userId?: string | null) => {
+    set({ joiningRoomCode: code, currentPlayerName: playerName, currentUserId: userId });
+    socketRef.current.emit(EV.ROOM_JOIN, { code, playerName, userId }, (response?: any) => {
+      // Caso o backend use callbacks para retornar sucesso no join:
+      if (response && response.success !== false) {
+        set({ roomCode: code, roomId: response.roomId || null, phase: 'waiting' });
+      }
+    });
+  }, [set]);
 
   /** Inicia partida (host). Payload: { roomId } */
   const startGame = useCallback(() => {
