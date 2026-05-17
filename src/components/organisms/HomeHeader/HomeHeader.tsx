@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
+import { spacing } from '@/theme/spacing';
 import Icon from 'react-native-vector-icons/Feather';
 import { SideMenu } from '@/components/organisms/SideMenu';
 
@@ -15,7 +16,8 @@ export default function HomeHeader() {
           layout.row,
           layout.itemsCenter,
           layout.justifyBetween,
-          { paddingVertical: 12, paddingHorizontal: 16 },
+          spacing.py_smd,
+          spacing.px_md,
         ]}
       >
         <TouchableOpacity onPress={() => setMenuVisible(true)}>

@@ -53,6 +53,7 @@ type MultiplayerState = {
   joiningRoomCode?: string | null;
   currentPlayerName?: string | null;
   currentUserId?: string | null;
+  isRoomCreator?: boolean;
 };
 
 const INITIAL: MultiplayerState = {
@@ -206,13 +207,13 @@ export function useMultiplayerRoom() {
 
   /** Cria sala. Payload: { playerName, userId } */
   const createRoom = useCallback((playerName: string, userId?: string | null) => {
-    set({ currentPlayerName: playerName, currentUserId: userId });
+    set({ currentPlayerName: playerName, currentUserId: userId, isRoomCreator: true });
     socketRef.current.emit(EV.ROOM_CREATE, { playerName, userId });
   }, [set]);
 
   /** Entra na sala. Payload: { code, playerName, userId } */
   const joinRoom = useCallback((code: string, playerName: string, userId?: string | null) => {
-    set({ joiningRoomCode: code, currentPlayerName: playerName, currentUserId: userId });
+    set({ joiningRoomCode: code, currentPlayerName: playerName, currentUserId: userId, isRoomCreator: false });
     socketRef.current.emit(EV.ROOM_JOIN, { code, playerName, userId }, (response?: any) => {
       // Caso o backend use callbacks para retornar sucesso no join:
       if (response && response.success !== false) {

@@ -1,18 +1,16 @@
 import { io, Socket } from 'socket.io-client';
-import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { getDevHost } from '@/utils/network/getDevHost';
+
+const PROD_URL = process.env.EXPO_PUBLIC_SOCKET_URL;
+const FORCE_PROD = process.env.EXPO_PUBLIC_FORCE_PROD === 'true';
 
 const getSocketURL = () => {
-  const FORCE_PROD = true; // ⚠️ Mantenha igual à api.ts
-
   if (!__DEV__ || FORCE_PROD) {
-    return 'https://gargantua.azurewebsites.net';
+    return PROD_URL;
   }
 
-  const debuggerHost =
-    Constants.expoConfig?.hostUri?.split(':').shift() ||
-    Constants.manifest?.debuggerHost?.split(':').shift() ||
-    Constants.manifest2?.extra?.expoGo?.debuggerHost?.split(':').shift();
+  const debuggerHost = getDevHost();
 
   if (Platform.OS === 'android') {
     if (!debuggerHost || debuggerHost === '127.0.0.1' || debuggerHost === 'localhost') {

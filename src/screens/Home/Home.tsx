@@ -86,7 +86,7 @@ type MenuItem = {
 };
 
 export default function HomeScreen() {
-  const { layout } = useTheme();
+  const { layout, colors } = useTheme();
   const navigation = useNavigation<RootScreenProps<Paths.Home>['navigation']>();
   const insets = useSafeAreaInsets();
 
@@ -118,9 +118,9 @@ export default function HomeScreen() {
   );
 
   const cardStyle = {
-  backgroundColor: 'rgba(59,130,246,0.12)',
-  borderColor: 'rgba(59,130,246,0.28)',
-};
+    backgroundColor: colors.cardBackground,
+    borderColor: colors.cardBorder,
+  };
   const menuItems: MenuItem[] = [
     {
       title: 'Jogar agora',
