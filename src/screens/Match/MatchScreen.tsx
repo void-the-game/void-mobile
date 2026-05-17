@@ -22,153 +22,178 @@ import { ActivityLogFeed } from '@/components/organisms/Match/ActivityLogFeed';
 import { PlayerHand } from '@/components/organisms/Match/PlayerHand';
 
 export default function MatchScreen() {
-    const { layout, colors, fonts } = useTheme();
-    const navigation = useNavigation();
-    const insets = useSafeAreaInsets();
+  const { layout, colors, fonts } = useTheme();
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
-    const [myId, setMyId] = useState<string | null>(null);
-    const [myAvatar, setMyAvatar] = useState<string | undefined>();
-    const [myNickname, setMyNickname] = useState('Tripulante');
+  const [myId, setMyId] = useState<string | null>(null);
+  const [myAvatar, setMyAvatar] = useState<string | undefined>();
+  const [myNickname, setMyNickname] = useState('Tripulante');
 
-    const {
-        gameState,
-        activityLog,
-        interrupt,
-        forcedDiscard,
-        gameOver,
-        error,
-        playCard,
-        passTurn,
-        playInterrupt,
-        sendForcedDiscard,
-        syncState,
-        dismissInterrupt,
-        dismissError,
-    } = useMultiplayerRoom();
+  const {
+    gameState,
+    activityLog,
+    interrupt,
+    forcedDiscard,
+    gameOver,
+    error,
+    playCard,
+    passTurn,
+    playInterrupt,
+    sendForcedDiscard,
+    syncState,
+    dismissInterrupt,
+    dismissError,
+  } = useMultiplayerRoom();
 
-    useEffect(() => {
-        const load = async () => {
-            const [id, token] = await Promise.all([storage.getUserId(), storage.getToken()]);
-            setMyId(id);
-            if (id && token) {
-                try {
-                    const res = await apiDev.get(`/profile/${id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (res.data?.profile?.avatar) setMyAvatar(res.data.profile.avatar);
-                    if (res.data?.profile?.nickname) setMyNickname(res.data.profile.nickname);
-                } catch (_) {}
-            }
-        };
-        load();
-    }, []);
+  useEffect(() => {
+    const load = async () => {
+      const [id, token] = await Promise.all([
+        storage.getUserId(),
+        storage.getToken(),
+      ]);
+      setMyId(id);
+      if (id && token) {
+        try {
+          const res = await apiDev.get(`/profile/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.data?.profile?.avatar) setMyAvatar(res.data.profile.avatar);
+          if (res.data?.profile?.nickname)
+            setMyNickname(res.data.profile.nickname);
+        } catch {}
+      }
+    };
+    load();
+  }, []);
 
-    useEffect(() => {
-        if (error) {
-            Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
-            dismissError();
-        }
-    }, [error]);
-
-    const isMyTurn = gameState?.currentTurnPlayerId === myId;
-    const myHand: { id: string; type: string; color: string }[] =
-        (gameState as any)?.playerHands?.[myId ?? ''] ?? [];
-
-    if (gameOver) {
-        return (
-            <GameOverView
-                won={gameOver.winnerId === myId}
-                winnerName={gameOver.winnerName}
-                myAvatar={myAvatar}
-                onGoHome={() => navigation.navigate(Paths.Home as never)}
-            />
-        );
+  useEffect(() => {
+    if (error) {
+      Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
+      dismissError();
     }
+  }, [error]);
 
+  const isMyTurn = gameState?.currentTurnPlayerId === myId;
+  const myHand: { id: string; type: string; color: string }[] =
+    (gameState as any)?.playerHands?.[myId ?? ''] ?? [];
+
+  if (gameOver) {
     return (
-        <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
-            <ScrollView
-                style={layout.flex_1}
-                contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120 }}
-                showsVerticalScrollIndicator={false}
-            >
-                <HomeHeader />
-
-                <MatchHeader
-                    myAvatar={myAvatar}
-                    myNickname={myNickname}
-                    isMyTurn={isMyTurn}
-                    onSync={syncState}
-                />
-
-                <OpponentList
-                    opponents={gameState?.players?.filter((p: any) => p.id !== myId) || []}
-                    currentTurnPlayerId={gameState?.currentTurnPlayerId}
-                />
-
-                <ActivityLogFeed log={activityLog || []} />
-
-                <PlayerHand
-                    hand={myHand}
-                    isMyTurn={isMyTurn}
-                    onPlayCard={(cardId) => playCard({ cardId })}
-                />
-            </ScrollView>
-
-            {isMyTurn && (
-                <View style={[styles.footerBar, { borderTopColor: 'rgba(59,130,246,0.18)', backgroundColor: colors.background }]}>
-                    <TouchableOpacity
-                        style={[styles.primaryBtn, { backgroundColor: '#374151', flex: 1 }]}
-                        onPress={passTurn}
-                    >
-                        <Feather name="skip-forward" size={16} color="white" />
-                        <Text style={[styles.primaryBtnText, { fontFamily: fonts.family.aldrich }]}>
-                            Passar turno
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-
-            {interrupt && (
-                <InterruptModal
-                    visible={!!interrupt}
-                    attackerName={interrupt.attackerName}
-                    cardType={interrupt.cardType}
-                    timeoutMs={interrupt.timeoutMs}
-                    availableResponses={interrupt.availableResponses}
-                    onRespond={cardId => { playInterrupt(cardId); dismissInterrupt(); }}
-                    onSkip={dismissInterrupt}
-                />
-            )}
-
-            {forcedDiscard && (
-                <ForcedDiscardModal
-                    visible={!!forcedDiscard}
-                    reason={forcedDiscard.reason}
-                    requiredColor={forcedDiscard.requiredColor}
-                    hand={myHand}
-                    onConfirm={sendForcedDiscard}
-                />
-            )}
-        </View>
+      <GameOverView
+        won={gameOver.winnerId === myId}
+        winnerName={gameOver.winnerName}
+        myAvatar={myAvatar}
+        onGoHome={() => navigation.navigate(Paths.Home as never)}
+      />
     );
+  }
+
+  return (
+    <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
+      <ScrollView
+        style={layout.flex_1}
+        contentContainerStyle={{
+          paddingTop: insets.top + 8,
+          paddingBottom: 120,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <HomeHeader />
+
+        <MatchHeader
+          myAvatar={myAvatar}
+          myNickname={myNickname}
+          isMyTurn={isMyTurn}
+          onSync={syncState}
+        />
+
+        <OpponentList
+          opponents={
+            gameState?.players?.filter((p: any) => p.id !== myId) || []
+          }
+          currentTurnPlayerId={gameState?.currentTurnPlayerId}
+        />
+
+        <ActivityLogFeed log={activityLog || []} />
+
+        <PlayerHand
+          hand={myHand}
+          isMyTurn={isMyTurn}
+          onPlayCard={(cardId) => playCard({ cardId })}
+        />
+      </ScrollView>
+
+      {isMyTurn && (
+        <View
+          style={[
+            styles.footerBar,
+            {
+              borderTopColor: 'rgba(59,130,246,0.18)',
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: '#374151', flex: 1 }]}
+            onPress={passTurn}
+          >
+            <Feather name="skip-forward" size={16} color="white" />
+            <Text
+              style={[
+                styles.primaryBtnText,
+                { fontFamily: fonts.family.aldrich },
+              ]}
+            >
+              Passar turno
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {interrupt && (
+        <InterruptModal
+          visible={!!interrupt}
+          attackerName={interrupt.attackerName}
+          cardType={interrupt.cardType}
+          timeoutMs={interrupt.timeoutMs}
+          availableResponses={interrupt.availableResponses}
+          onRespond={(cardId) => {
+            playInterrupt(cardId);
+            dismissInterrupt();
+          }}
+          onSkip={dismissInterrupt}
+        />
+      )}
+
+      {forcedDiscard && (
+        <ForcedDiscardModal
+          visible={!!forcedDiscard}
+          reason={forcedDiscard.reason}
+          requiredColor={forcedDiscard.requiredColor}
+          hand={myHand}
+          onConfirm={sendForcedDiscard}
+        />
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    footerBar: {
-        flexDirection: 'row',
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        borderTopWidth: 1,
-        gap: 10,
-    },
-    primaryBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 16,
-        borderRadius: 999,
-        gap: 8,
-    },
-    primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '600' },
+  footerBar: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    gap: 10,
+  },
+  primaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 999,
+    gap: 8,
+  },
+  primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '600' },
 });

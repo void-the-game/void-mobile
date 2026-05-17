@@ -12,15 +12,15 @@ type Dot = {
 const DOT_SIZE = 4;
 
 const DOTS: Dot[] = [
-  { top: '10%', left: '12%', color: '#3B82F6', delay: 0, maxOpacity: 0.70 },
-  { top: '16%', left: '74%', color: '#22C55E', delay: 280, maxOpacity: 0.70 },
-  { top: '32%', left: '38%', color: '#EAB308', delay: 620, maxOpacity: 0.70 },
+  { top: '10%', left: '12%', color: '#3B82F6', delay: 0, maxOpacity: 0.7 },
+  { top: '16%', left: '74%', color: '#22C55E', delay: 280, maxOpacity: 0.7 },
+  { top: '32%', left: '38%', color: '#EAB308', delay: 620, maxOpacity: 0.7 },
   { top: '36%', left: '86%', color: '#A855F7', delay: 420, maxOpacity: 0.17 },
   { top: '57%', left: '66%', color: '#22C55E', delay: 540, maxOpacity: 0.15 },
   { top: '69%', left: '10%', color: '#EAB308', delay: 1080, maxOpacity: 0.13 },
-  { top: '76%', left: '82%', color: '#A855F7', delay: 760, maxOpacity: 0.70 },
+  { top: '76%', left: '82%', color: '#A855F7', delay: 760, maxOpacity: 0.7 },
   { top: '88%', left: '30%', color: '#3B82F6', delay: 1180, maxOpacity: 0.14 },
-  { top: '84%', left: '64%', color: '#22C55E', delay: 860, maxOpacity: 0.70 },
+  { top: '84%', left: '64%', color: '#22C55E', delay: 860, maxOpacity: 0.7 },
 ];
 
 function GlowDot({ dot }: { dot: Dot }) {
@@ -63,7 +63,7 @@ function GlowDot({ dot }: { dot: Dot }) {
             isInteraction: false,
           }),
         ]),
-      ])
+      ]),
     );
 
     loop.start();

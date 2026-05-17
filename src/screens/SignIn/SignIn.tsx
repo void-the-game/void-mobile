@@ -72,7 +72,7 @@ export default function SignIn() {
             text1: 'Bem-vindo(a) a bordo!',
             text2: 'Agora é só aproveitar o app.',
           });
-        } catch (profileError) {
+        } catch {
           // Se falhou (teoricamente 404), ele manda pra criação de perfil
           setIsLoading(false);
           navigation.navigate(Paths.SetupProfile);

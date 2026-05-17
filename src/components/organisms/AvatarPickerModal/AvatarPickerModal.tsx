@@ -35,7 +35,7 @@ export function AvatarPickerModal({
   onSelectAvatar,
   localMode = false,
 }: AvatarPickerModalProps) {
-  const { colors, fonts, gutters, layout } = useTheme();
+  const { colors, fonts, gutters } = useTheme();
   const [avatars, setAvatars] = useState<Avatar[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

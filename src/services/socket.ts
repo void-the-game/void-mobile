@@ -13,7 +13,11 @@ const getSocketURL = () => {
   const debuggerHost = getDevHost();
 
   if (Platform.OS === 'android') {
-    if (!debuggerHost || debuggerHost === '127.0.0.1' || debuggerHost === 'localhost') {
+    if (
+      !debuggerHost ||
+      debuggerHost === '127.0.0.1' ||
+      debuggerHost === 'localhost'
+    ) {
       return 'http://10.0.2.2:3000';
     }
     if (debuggerHost.match(/^(192\.168\.|10\.)/)) {
@@ -23,7 +27,11 @@ const getSocketURL = () => {
   }
 
   if (Platform.OS === 'ios') {
-    if (debuggerHost && debuggerHost !== '127.0.0.1' && debuggerHost !== 'localhost') {
+    if (
+      debuggerHost &&
+      debuggerHost !== '127.0.0.1' &&
+      debuggerHost !== 'localhost'
+    ) {
       return `http://${debuggerHost}:3000`;
     }
     return 'http://localhost:3000';

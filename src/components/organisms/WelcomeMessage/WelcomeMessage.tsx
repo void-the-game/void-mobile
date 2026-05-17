@@ -10,7 +10,10 @@ interface WelcomeMessageProps {
   username?: string;
 }
 
-function WelcomeMessage({ avatar, username: propUsername }: WelcomeMessageProps) {
+function WelcomeMessage({
+  avatar,
+  username: propUsername,
+}: WelcomeMessageProps) {
   const { fonts } = useTheme();
   const [localUsername, setLocalUsername] = useState('');
 
@@ -29,9 +32,16 @@ function WelcomeMessage({ avatar, username: propUsername }: WelcomeMessageProps)
   return (
     <View style={styles.wrapper}>
       {avatar ? (
-        <Image 
-          source={{ uri: avatar }} 
-          style={{ width: 64, height: 64, borderRadius: 32, borderWidth: 2, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.2)' }} 
+        <Image
+          source={{ uri: avatar }}
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            borderWidth: 2,
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59,130,246,0.2)',
+          }}
         />
       ) : (
         <AstronautIcon

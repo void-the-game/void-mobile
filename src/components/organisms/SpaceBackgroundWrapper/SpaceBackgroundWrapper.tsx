@@ -27,9 +27,7 @@ const SpaceBackgroundWrapper: React.FC<Props> = ({
       <StarField stars={stars} style={styles.stars} />
       <FloatingGlowDots />
 
-      <SafeAreaView style={layout.flex_1}>
-        {children}
-      </SafeAreaView>
+      <SafeAreaView style={layout.flex_1}>{children}</SafeAreaView>
     </View>
   );
 };

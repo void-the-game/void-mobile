@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Share, StyleSheet } from 'react-native';
+import { View, Share } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-toast-message';
@@ -22,229 +22,232 @@ type Navigation = StackNavigationProp<RootStackParamList>;
 type LobbyStep = 'browser' | 'waiting';
 
 export default function LobbyScreen() {
-    const { layout } = useTheme();
-    const navigation = useNavigation<Navigation>();
-    const [activeTab, setActiveTab] = useState<BottomTab>('home');
+  const { layout } = useTheme();
+  const navigation = useNavigation<Navigation>();
+  const [activeTab, setActiveTab] = useState<BottomTab>('home');
 
-    const [step, setStep] = useState<LobbyStep>('browser');
-    const [playerName, setPlayerName] = useState('');
-    const [playerAvatar, setPlayerAvatar] = useState<string | undefined>();
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [joinCode, setJoinCode] = useState('');
-    const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const [step, setStep] = useState<LobbyStep>('browser');
+  const [playerName, setPlayerName] = useState('');
+  const [playerAvatar, setPlayerAvatar] = useState<string | undefined>();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [joinCode, setJoinCode] = useState('');
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
 
-    const [creatingRoom, setCreatingRoom] = useState(false);
-    const [joiningRoom, setJoiningRoom] = useState(false);
-    const [startingMatch, setStartingMatch] = useState(false);
+  const [creatingRoom, setCreatingRoom] = useState(false);
+  const [joiningRoom, setJoiningRoom] = useState(false);
+  const [startingMatch, setStartingMatch] = useState(false);
 
-    const {
-        connected,
-        phase,
-        roomId,
-        roomCode,
-        players,
-        error,
-        isRoomCreator,
-        createRoom,
-        joinRoom,
-        startGame,
-        leaveRoom,
-        dismissError,
-    } = useMultiplayerRoom();
+  const {
+    connected,
+    phase,
+    roomId,
+    roomCode,
+    players,
+    error,
+    isRoomCreator,
+    createRoom,
+    joinRoom,
+    leaveRoom,
+    dismissError,
+  } = useMultiplayerRoom();
 
-    const isHost = players.length > 0 ? players[0].name === playerName : !!isRoomCreator;
+  const isHost =
+    players.length > 0 ? players[0].name === playerName : !!isRoomCreator;
 
-    useFocusEffect(
-        useCallback(() => {
-            const fetchProfile = async () => {
-                try {
-                    const userId = await storage.getUserId();
-                    const token = await storage.getToken();
-                    if (!userId || !token) return;
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const userId = await storage.getUserId();
+          const token = await storage.getToken();
+          if (!userId || !token) return;
 
-                    setCurrentUserId(userId);
+          setCurrentUserId(userId);
 
-                    const response = await apiDev.get(`/profile/${userId}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
+          const response = await apiDev.get(`/profile/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-                    if (response.data.success && response.data.profile) {
-                        const { nickname, avatar } = response.data.profile;
-                        if (nickname) setPlayerName(nickname);
-                        if (avatar) setPlayerAvatar(avatar);
-                    }
-                } catch (err: any) {
-                    console.log('Error fetching profile in Lobby:', err.message);
-                }
-            };
-
-            fetchProfile();
-        }, [])
-    );
-
-    useEffect(() => {
-        if (roomCode) setStep('waiting');
-    }, [roomCode]);
-
-    useEffect(() => {
-        if (phase === 'playing' && roomId) {
-            navigation.navigate(Paths.Match as any, { roomId });
+          if (response.data.success && response.data.profile) {
+            const { nickname, avatar } = response.data.profile;
+            if (nickname) setPlayerName(nickname);
+            if (avatar) setPlayerAvatar(avatar);
+          }
+        } catch (err: any) {
+          console.log('Error fetching profile in Lobby:', err.message);
         }
-    }, [phase, roomId, navigation]);
+      };
 
-    useEffect(() => {
-        if (roomCode && creatingRoom) setCreatingRoom(false);
-    }, [roomCode, creatingRoom]);
+      fetchProfile();
+    }, []),
+  );
 
-    useEffect(() => {
-        if (roomCode && joiningRoom) setJoiningRoom(false);
-    }, [roomCode, joiningRoom]);
+  useEffect(() => {
+    if (roomCode) setStep('waiting');
+  }, [roomCode]);
 
-    useEffect(() => {
-        if (phase === 'playing' && startingMatch) setStartingMatch(false);
-    }, [phase, startingMatch]);
+  useEffect(() => {
+    if (phase === 'playing' && roomId) {
+      navigation.navigate(Paths.Match as any, { roomId });
+    }
+  }, [phase, roomId, navigation]);
 
-    useEffect(() => {
-        if (error) {
-            setCreatingRoom(false);
-            setJoiningRoom(false);
-            setStartingMatch(false);
-            Toast.show({ type: 'error', text1: 'Erro', text2: error });
-            dismissError();
-        }
-    }, [error, dismissError]);
+  useEffect(() => {
+    if (roomCode && creatingRoom) setCreatingRoom(false);
+  }, [roomCode, creatingRoom]);
 
-    const handleTabChange = (tab: BottomTab) => {
-        if (tab === 'home') {
-            setStep('browser');
-            setJoinCode('');
-            setJoinModalVisible(false);
-            navigation.navigate(Paths.Home as any);
-            return;
-        }
+  useEffect(() => {
+    if (roomCode && joiningRoom) setJoiningRoom(false);
+  }, [roomCode, joiningRoom]);
 
-        if (tab === 'profile') {
-            navigation.navigate(Paths.EditProfile as any);
-            return;
-        }
+  useEffect(() => {
+    if (phase === 'playing' && startingMatch) setStartingMatch(false);
+  }, [phase, startingMatch]);
 
-        setActiveTab(tab);
-    };
+  useEffect(() => {
+    if (error) {
+      setCreatingRoom(false);
+      setJoiningRoom(false);
+      setStartingMatch(false);
+      Toast.show({ type: 'error', text1: 'Erro', text2: error });
+      dismissError();
+    }
+  }, [error, dismissError]);
 
-    const handleCreate = () => {
-        if (!playerName.trim()) {
-            Toast.show({
-                type: 'info',
-                text1: 'Atenção',
-                text2: 'Informe seu nome antes de criar uma sala.',
-            });
-            return;
-        }
+  const handleTabChange = (tab: BottomTab) => {
+    if (tab === 'home') {
+      setStep('browser');
+      setJoinCode('');
+      setJoinModalVisible(false);
+      navigation.navigate(Paths.Home as any);
+      return;
+    }
 
-        setCreatingRoom(true);
-        createRoom(playerName.trim(), currentUserId);
-    };
+    if (tab === 'profile') {
+      navigation.navigate(Paths.EditProfile as any);
+      return;
+    }
 
-    const handleJoin = () => {
-        if (!playerName.trim()) {
-            Toast.show({
-                type: 'info',
-                text1: 'Atenção',
-                text2: 'Informe seu nome antes de entrar.',
-            });
-            return;
-        }
+    setActiveTab(tab);
+  };
 
-        if (!joinCode.trim()) {
-            Toast.show({
-                type: 'info',
-                text1: 'Atenção',
-                text2: 'Informe o código da sala.',
-            });
-            return;
-        }
+  const handleCreate = () => {
+    if (!playerName.trim()) {
+      Toast.show({
+        type: 'info',
+        text1: 'Atenção',
+        text2: 'Informe seu nome antes de criar uma sala.',
+      });
+      return;
+    }
 
-        setJoiningRoom(true);
-        joinRoom(joinCode.trim().toUpperCase(), playerName.trim(), currentUserId);
-        setJoinModalVisible(false);
-    };
+    setCreatingRoom(true);
+    createRoom(playerName.trim(), currentUserId);
+  };
 
-    const handleStartGame = () => {
-        Toast.show({
-            type: 'info',
-            text1: 'Partida em preparação',
-            text2: 'A conexão entre jogadores já funciona, mas o fluxo completo da partida ainda está em construção.',
-            visibilityTime: 2800,
-        });
+  const handleJoin = () => {
+    if (!playerName.trim()) {
+      Toast.show({
+        type: 'info',
+        text1: 'Atenção',
+        text2: 'Informe seu nome antes de entrar.',
+      });
+      return;
+    }
 
-        setStartingMatch(false);
-    };
+    if (!joinCode.trim()) {
+      Toast.show({
+        type: 'info',
+        text1: 'Atenção',
+        text2: 'Informe o código da sala.',
+      });
+      return;
+    }
 
-    const handleShare = () => {
-        if (!roomCode) return;
-        Share.share({ message: `Entre na minha sala no Void! Código: ${roomCode}` });
-    };
+    setJoiningRoom(true);
+    joinRoom(joinCode.trim().toUpperCase(), playerName.trim(), currentUserId);
+    setJoinModalVisible(false);
+  };
 
-    return (
-        <SpaceBackgroundWrapper>
-            <View style={layout.flex_1}>
-                {step === 'browser' ? (
-                    <LobbyBrowser
-                        connected={connected}
-                        playerName={playerName}
-                        playerAvatar={playerAvatar}
-                        onCreateRoom={handleCreate}
-                        onOpenJoinModal={() => setJoinModalVisible(true)}
-                    />
-                ) : (
-                    <WaitingRoom
-                        roomCode={roomCode}
-                        players={players}
-                        isHost={isHost}
-                        currentUserId={currentUserId}
-                        playerAvatar={playerAvatar}
-                        onStartGame={handleStartGame}
-                        onShare={handleShare}
-                        onLeave={() => {
-                            leaveRoom();
-                            setStep('browser');
-                        }}
-                    />
-                )}
+  const handleStartGame = () => {
+    Toast.show({
+      type: 'info',
+      text1: 'Partida em preparação',
+      text2:
+        'A conexão entre jogadores já funciona, mas o fluxo completo da partida ainda está em construção.',
+      visibilityTime: 2800,
+    });
 
-                {step === 'browser' && (
-                    <>
-                        <JoinRoomModal
-                            visible={joinModalVisible}
-                            joinCode={joinCode}
-                            onJoinCodeChange={setJoinCode}
-                            onJoin={handleJoin}
-                            onClose={() => {
-                                setJoinModalVisible(false);
-                                setJoinCode('');
-                            }}
-                        />
+    setStartingMatch(false);
+  };
 
-                        <BottomNav
-                            active={activeTab}
-                            onChange={handleTabChange}
-                            backgroundColor="transparent"
-                        />
-                    </>
-                )}
+  const handleShare = () => {
+    if (!roomCode) return;
+    Share.share({
+      message: `Entre na minha sala no Void! Código: ${roomCode}`,
+    });
+  };
 
-                <SpaceTransitionOverlay
-                    visible={creatingRoom}
-                    title="Abrindo fenda espacial..."
-                    subtitle="Criando a sala da missão"
-                />
+  return (
+    <SpaceBackgroundWrapper>
+      <View style={layout.flex_1}>
+        {step === 'browser' ? (
+          <LobbyBrowser
+            connected={connected}
+            playerName={playerName}
+            playerAvatar={playerAvatar}
+            onCreateRoom={handleCreate}
+            onOpenJoinModal={() => setJoinModalVisible(true)}
+          />
+        ) : (
+          <WaitingRoom
+            roomCode={roomCode}
+            players={players}
+            isHost={isHost}
+            currentUserId={currentUserId}
+            playerAvatar={playerAvatar}
+            onStartGame={handleStartGame}
+            onShare={handleShare}
+            onLeave={() => {
+              leaveRoom();
+              setStep('browser');
+            }}
+          />
+        )}
 
-                <SpaceTransitionOverlay
-                    visible={joiningRoom}
-                    title="Acoplando à nave..."
-                    subtitle="Entrando na sala informada"
-                />
-            </View>
-        </SpaceBackgroundWrapper>
-    );
+        {step === 'browser' && (
+          <>
+            <JoinRoomModal
+              visible={joinModalVisible}
+              joinCode={joinCode}
+              onJoinCodeChange={setJoinCode}
+              onJoin={handleJoin}
+              onClose={() => {
+                setJoinModalVisible(false);
+                setJoinCode('');
+              }}
+            />
+
+            <BottomNav
+              active={activeTab}
+              onChange={handleTabChange}
+              backgroundColor="transparent"
+            />
+          </>
+        )}
+
+        <SpaceTransitionOverlay
+          visible={creatingRoom}
+          title="Abrindo fenda espacial..."
+          subtitle="Criando a sala da missão"
+        />
+
+        <SpaceTransitionOverlay
+          visible={joiningRoom}
+          title="Acoplando à nave..."
+          subtitle="Entrando na sala informada"
+        />
+      </View>
+    </SpaceBackgroundWrapper>
+  );
 }
