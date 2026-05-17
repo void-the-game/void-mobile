@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { StarField } from '@/components/molecules/StarField';
+import { FloatingGlowDots } from '@/components/organisms/FloatingGlowDots/FloatingGlowDots';
 import { generateStarCoordinates } from '@/utils/generateStarCoordinates';
 
 type Props = {
@@ -18,13 +19,17 @@ const SpaceBackgroundWrapper: React.FC<Props> = ({
     () => generateStarCoordinates({ quantity: starCount }),
     [starCount],
   );
+
   const { colors, layout } = useTheme();
 
   return (
     <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
       <StarField stars={stars} style={styles.stars} />
+      <FloatingGlowDots />
 
-      <SafeAreaView style={layout.flex_1}>{children}</SafeAreaView>
+      <SafeAreaView style={layout.flex_1}>
+        {children}
+      </SafeAreaView>
     </View>
   );
 };

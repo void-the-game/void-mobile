@@ -13,4 +13,7 @@ export const colors = {
 
   error: '#CB2E2E',
   success: '#10B981',
+
+  cardBackground: 'rgba(59,130,246,0.12)',
+  cardBorder: 'rgba(59,130,246,0.28)',
 } as const;

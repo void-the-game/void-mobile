@@ -1,7 +1,7 @@
 import React from 'react';
 import Svg, {
   Path, Circle, Line, Ellipse, Polygon,
-  Defs, RadialGradient, Stop, G
+  Defs, RadialGradient, Stop, G, Rect
 } from 'react-native-svg';
 
 type IconProps = { color?: string; size?: number };
@@ -183,4 +183,70 @@ export function MissionsIcon({ color = '#F59E0B', size = 48 }: IconProps) {
       <Circle cx="38" cy="8"  r="1.5" fill={color} fillOpacity="0.4" />
     </Svg>
   );
+
 }
+
+export const RoomJoinIcon = ({ color = '#3B82F6', size = 48 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+    <Defs>
+      <RadialGradient id="portalGlow" cx="50%" cy="50%" r="50%">
+        <Stop offset="0%" stopColor={color} stopOpacity="0.25" />
+        <Stop offset="100%" stopColor={color} stopOpacity="0" />
+      </RadialGradient>
+    </Defs>
+    {/* Glow de fundo */}
+    <Circle cx="32" cy="32" r="28" fill="url(#portalGlow)" />
+    {/* Anel externo */}
+    <Circle cx="32" cy="32" r="22" stroke={color} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
+    {/* Anel médio */}
+    <Circle cx="32" cy="32" r="15" stroke={color} strokeWidth="2" opacity="0.75" />
+    {/* Portal interno */}
+    <Circle cx="32" cy="32" r="8" fill={color} fillOpacity="0.15" stroke={color} strokeWidth="1.5" />
+    {/* Seta entrando */}
+    <Path d="M24 32 H40" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <Path d="M34 26 L40 32 L34 38" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    {/* Pontos orbitando */}
+    <Circle cx="32" cy="10" r="2" fill={color} opacity="0.6" />
+    <Circle cx="54" cy="32" r="1.5" fill={color} opacity="0.4" />
+    <Circle cx="32" cy="54" r="2" fill={color} opacity="0.6" />
+    <Circle cx="10" cy="32" r="1.5" fill={color} opacity="0.4" />
+    <Circle cx="47" cy="15" r="1.2" fill={color} opacity="0.3" />
+    <Circle cx="17" cy="47" r="1.2" fill={color} opacity="0.3" />
+  </Svg>
+);
+
+export const RoomCreateIcon = ({ color = '#E91E63', size = 48 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+    <Defs>
+      <RadialGradient id="stationGlow" cx="50%" cy="50%" r="50%">
+        <Stop offset="0%" stopColor={color} stopOpacity="0.2" />
+        <Stop offset="100%" stopColor={color} stopOpacity="0" />
+      </RadialGradient>
+    </Defs>
+    {/* Glow */}
+    <Circle cx="32" cy="32" r="28" fill="url(#stationGlow)" />
+    {/* Hexágono — estação espacial */}
+    <Path
+      d="M32 10 L50 21 L50 43 L32 54 L14 43 L14 21 Z"
+      stroke={color}
+      strokeWidth="1.8"
+      fill={color}
+      fillOpacity="0.07"
+    />
+    {/* Linhas internas da estação */}
+    <Path d="M32 10 L32 54" stroke={color} strokeWidth="0.8" opacity="0.3" />
+    <Path d="M14 21 L50 43" stroke={color} strokeWidth="0.8" opacity="0.3" />
+    <Path d="M50 21 L14 43" stroke={color} strokeWidth="0.8" opacity="0.3" />
+    {/* Cruz central — criar */}
+    <Path d="M32 24 V40" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <Path d="M24 32 H40" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    {/* Núcleo */}
+    <Circle cx="32" cy="32" r="4" fill={color} fillOpacity="0.2" stroke={color} strokeWidth="1.2" />
+    {/* Painéis solares */}
+    <Rect x="4" y="29" width="8" height="6" rx="1" fill={color} fillOpacity="0.4" stroke={color} strokeWidth="1" />
+    <Rect x="52" y="29" width="8" height="6" rx="1" fill={color} fillOpacity="0.4" stroke={color} strokeWidth="1" />
+    {/* Detalhes de conexão */}
+    <Line x1="12" y1="32" x2="14" y2="32" stroke={color} strokeWidth="1.5" />
+    <Line x1="50" y1="32" x2="52" y2="32" stroke={color} strokeWidth="1.5" />
+  </Svg>
+);

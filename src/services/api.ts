@@ -1,19 +1,17 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants';
+import { getDevHost } from '@/utils/network/getDevHost';
+
+const PROD_URL = process.env.EXPO_PUBLIC_API_URL;
+const FORCE_PROD = process.env.EXPO_PUBLIC_FORCE_PROD === 'true';
 
 const getBaseURL = () => {
-  const FORCE_PROD = true; // ⚠️ TEMPORÁRIO: true = usa produção localmente, false = usa dev
-
   if (!__DEV__ || FORCE_PROD) {
-    return 'https://gargantua.azurewebsites.net/api';
+    return PROD_URL;
   }
 
   // Tentar pegar o IP do host
-  const debuggerHost =
-    Constants.expoConfig?.hostUri?.split(':').shift() ||
-    Constants.manifest?.debuggerHost?.split(':').shift() ||
-    Constants.manifest2?.extra?.expoGo?.debuggerHost?.split(':').shift();
+  const debuggerHost = getDevHost();
 
   console.log('🔍 debuggerHost detectado:', debuggerHost);
   console.log('📱 Platform:', Platform.OS);
