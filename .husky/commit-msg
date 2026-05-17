@@ -1,1 +1,11 @@
-npx --no -- commitlint --edit "$1"
+npx --no -- commitlint --edit "$1" || {
+  echo ""
+  echo "❌ Erro: Mensagem de commit fora do padrão Conventional Commits!"
+  echo ""
+  echo "O padrão deve ser: <tipo>(<escopo>): <descrição>"
+  echo "Exemplos: feat(auth): add login, fix: button color, chore: update deps"
+  echo ""
+  echo "Tipos aceitos: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+  echo "----------------------------------------------------------------------------"
+  exit 1
+}
