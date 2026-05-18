@@ -13,7 +13,7 @@ export type RootStackParamList = {
   [Paths.EditProfile]: undefined;
   [Paths.SetupProfile]: undefined;
 
-   // Multiplayer
+  // Multiplayer
   Lobby: undefined;
   Match: { roomId: string };
 };

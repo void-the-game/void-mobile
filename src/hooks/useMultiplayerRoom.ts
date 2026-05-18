@@ -81,7 +81,7 @@ export function useMultiplayerRoom() {
   }, [state]);
 
   const set = useCallback((partial: Partial<MultiplayerState>) => {
-    setState(prev => ({ ...prev, ...partial }));
+    setState((prev) => ({ ...prev, ...partial }));
   }, []);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function useMultiplayerRoom() {
     s.on('connect', () => {
       set({ connected: true });
       const current = stateRef.current;
-      
+
       // @ts-ignore - socket.recovered flag do socket.io-client para CSR
       if (s.recovered) {
         console.log('[socket] Sessão recuperada — mantendo estado anterior');
@@ -104,15 +104,18 @@ export function useMultiplayerRoom() {
 
       // Auto-reconnect flow (fallback): se a gente já tinha uma sala e desconectou por muito tempo
       if (current.roomCode && current.currentPlayerName) {
-         console.log('[Socket] Reconectado sem CSR! Tentando voltar para a sala:', current.roomCode);
-         s.emit(EV.ROOM_JOIN, { 
-           code: current.roomCode, 
-           playerName: current.currentPlayerName, 
-           userId: current.currentUserId 
-         });
+        console.log(
+          '[Socket] Reconectado sem CSR! Tentando voltar para a sala:',
+          current.roomCode,
+        );
+        s.emit(EV.ROOM_JOIN, {
+          code: current.roomCode,
+          playerName: current.currentPlayerName,
+          userId: current.currentUserId,
+        });
       }
     });
-    
+
     s.on('disconnect', () => set({ connected: false }));
 
     // room:created → { roomId, code }
@@ -128,10 +131,10 @@ export function useMultiplayerRoom() {
     s.on(EV.ROOM_PLAYER_JOINED, (payload: RoomPlayersPayload) => {
       set({
         players: payload.players,
-        phase: 'waiting'
+        phase: 'waiting',
       });
       // Fallback para caso o roomCode não tenha sido setado corretamente no callback do joinRoom
-      setState(prev => {
+      setState((prev) => {
         if (!prev.roomCode && prev.joiningRoomCode) {
           return { ...prev, roomCode: prev.joiningRoomCode };
         }
@@ -153,7 +156,7 @@ export function useMultiplayerRoom() {
 
     // card:played → log público
     s.on(EV.CARD_PLAYED, (payload: PublicActionPayload) => {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         activityLog: [payload, ...prev.activityLog].slice(0, 20),
       }));
@@ -176,14 +179,14 @@ export function useMultiplayerRoom() {
 
     // player:eliminated → marca jogador como eliminado
     s.on(EV.PLAYER_ELIMINATED, ({ playerId }: { playerId: string }) => {
-      setState(prev => {
+      setState((prev) => {
         if (!prev.gameState) return prev;
         return {
           ...prev,
           gameState: {
             ...prev.gameState,
-            players: prev.gameState.players.map(p =>
-              p.id === playerId ? { ...p, isEliminated: true } : p
+            players: prev.gameState.players.map((p) =>
+              p.id === playerId ? { ...p, isEliminated: true } : p,
             ),
           },
         };
@@ -196,7 +199,7 @@ export function useMultiplayerRoom() {
     });
 
     return () => {
-      Object.values(EV).forEach(ev => s.off(ev));
+      Object.values(EV).forEach((ev) => s.off(ev));
       s.off('connect');
       s.off('disconnect');
       disconnectSocket();
@@ -206,21 +209,44 @@ export function useMultiplayerRoom() {
   // ─── Ações ────────────────────────────────────────────────────────────────
 
   /** Cria sala. Payload: { playerName, userId } */
-  const createRoom = useCallback((playerName: string, userId?: string | null) => {
-    set({ currentPlayerName: playerName, currentUserId: userId, isRoomCreator: true });
-    socketRef.current.emit(EV.ROOM_CREATE, { playerName, userId });
-  }, [set]);
+  const createRoom = useCallback(
+    (playerName: string, userId?: string | null) => {
+      set({
+        currentPlayerName: playerName,
+        currentUserId: userId,
+        isRoomCreator: true,
+      });
+      socketRef.current.emit(EV.ROOM_CREATE, { playerName, userId });
+    },
+    [set],
+  );
 
   /** Entra na sala. Payload: { code, playerName, userId } */
-  const joinRoom = useCallback((code: string, playerName: string, userId?: string | null) => {
-    set({ joiningRoomCode: code, currentPlayerName: playerName, currentUserId: userId, isRoomCreator: false });
-    socketRef.current.emit(EV.ROOM_JOIN, { code, playerName, userId }, (response?: any) => {
-      // Caso o backend use callbacks para retornar sucesso no join:
-      if (response && response.success !== false) {
-        set({ roomCode: code, roomId: response.roomId || null, phase: 'waiting' });
-      }
-    });
-  }, [set]);
+  const joinRoom = useCallback(
+    (code: string, playerName: string, userId?: string | null) => {
+      set({
+        joiningRoomCode: code,
+        currentPlayerName: playerName,
+        currentUserId: userId,
+        isRoomCreator: false,
+      });
+      socketRef.current.emit(
+        EV.ROOM_JOIN,
+        { code, playerName, userId },
+        (response?: any) => {
+          // Caso o backend use callbacks para retornar sucesso no join:
+          if (response && response.success !== false) {
+            set({
+              roomCode: code,
+              roomId: response.roomId || null,
+              phase: 'waiting',
+            });
+          }
+        },
+      );
+    },
+    [set],
+  );
 
   /** Inicia partida (host). Payload: { roomId } */
   const startGame = useCallback(() => {
@@ -229,15 +255,21 @@ export function useMultiplayerRoom() {
   }, [state.roomId]);
 
   /** Joga carta. Payload: { roomId, cardId, targetPlayerId?, recycleCardIds?, essenceCardId? } */
-  const playCard = useCallback((payload: {
-    cardId: string;
-    targetPlayerId?: string;
-    recycleCardIds?: string[];
-    essenceCardId?: string;
-  }) => {
-    if (!state.roomId) return;
-    socketRef.current.emit(EV.CARD_PLAY, { roomId: state.roomId, ...payload });
-  }, [state.roomId]);
+  const playCard = useCallback(
+    (payload: {
+      cardId: string;
+      targetPlayerId?: string;
+      recycleCardIds?: string[];
+      essenceCardId?: string;
+    }) => {
+      if (!state.roomId) return;
+      socketRef.current.emit(EV.CARD_PLAY, {
+        roomId: state.roomId,
+        ...payload,
+      });
+    },
+    [state.roomId],
+  );
 
   /** Passa o turno. Payload: { roomId } */
   const passTurn = useCallback(() => {
@@ -246,17 +278,29 @@ export function useMultiplayerRoom() {
   }, [state.roomId]);
 
   /** Reage com carta de interrupção. Payload: { roomId, cardId } */
-  const playInterrupt = useCallback((cardId: string) => {
-    if (!state.roomId) return;
-    socketRef.current.emit(EV.INTERRUPT_PLAY, { roomId: state.roomId, cardId });
-  }, [state.roomId]);
+  const playInterrupt = useCallback(
+    (cardId: string) => {
+      if (!state.roomId) return;
+      socketRef.current.emit(EV.INTERRUPT_PLAY, {
+        roomId: state.roomId,
+        cardId,
+      });
+    },
+    [state.roomId],
+  );
 
   /** Envia descarte (Vórtice/Buraco Negro). Payload: { roomId, cardIds } */
-  const sendForcedDiscard = useCallback((cardIds: string[]) => {
-    if (!state.roomId) return;
-    socketRef.current.emit(EV.DISCARD_SUBMIT, { roomId: state.roomId, cardIds });
-    set({ forcedDiscard: null });
-  }, [state.roomId, set]);
+  const sendForcedDiscard = useCallback(
+    (cardIds: string[]) => {
+      if (!state.roomId) return;
+      socketRef.current.emit(EV.DISCARD_SUBMIT, {
+        roomId: state.roomId,
+        cardIds,
+      });
+      set({ forcedDiscard: null });
+    },
+    [state.roomId, set],
+  );
 
   /** Solicita estado atual (reconexão). Payload: { roomId } */
   const syncState = useCallback(() => {

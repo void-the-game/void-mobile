@@ -24,7 +24,14 @@ type MenuButtonProps = {
   comingSoon?: boolean;
 } & Omit<TouchableOpacityProps, 'style'>;
 
-function MenuButton({ title, characterImage, icon, style, comingSoon, ...props }: MenuButtonProps) {
+function MenuButton({
+  title,
+  characterImage,
+  icon,
+  style,
+  comingSoon,
+  ...props
+}: MenuButtonProps) {
   const { colors, fonts, gutters } = useTheme();
 
   return (
@@ -53,7 +60,11 @@ function MenuButton({ title, characterImage, icon, style, comingSoon, ...props }
           {icon}
         </View>
       ) : characterImage ? (
-        <Image source={characterImage} style={{ width: 48, height: 48 }} resizeMode="contain" />
+        <Image
+          source={characterImage}
+          style={{ width: 48, height: 48 }}
+          resizeMode="contain"
+        />
       ) : null}
 
       <ThemeText
@@ -70,18 +81,27 @@ function MenuButton({ title, characterImage, icon, style, comingSoon, ...props }
       </ThemeText>
 
       {comingSoon && (
-        <View style={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          backgroundColor: 'rgba(59,130,246,0.15)',
-          borderWidth: 1,
-          borderColor: 'rgba(59,130,246,0.35)',
-          borderRadius: 999,
-          paddingHorizontal: 6,
-          paddingVertical: 2,
-        }}>
-          <Text style={{ fontSize: 9, color: '#60A5FA', fontWeight: '700', letterSpacing: 0.5 }}>
+        <View
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            backgroundColor: 'rgba(59,130,246,0.15)',
+            borderWidth: 1,
+            borderColor: 'rgba(59,130,246,0.35)',
+            borderRadius: 999,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 9,
+              color: '#60A5FA',
+              fontWeight: '700',
+              letterSpacing: 0.5,
+            }}
+          >
             EM BREVE
           </Text>
         </View>

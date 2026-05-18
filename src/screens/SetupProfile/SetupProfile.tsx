@@ -25,22 +25,22 @@ import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { AvatarPickerModal } from '@/components/organisms/AvatarPickerModal';
 
-
 type Navigation = StackNavigationProp<RootStackParamList>;
 
-
 export default function SetupProfile() {
-  const { colors, fonts, layout, gutters, spacing } = useTheme();
+  const { colors, fonts, gutters } = useTheme();
   const navigation = useNavigation<Navigation>();
-
 
   const [nickname, setNickname] = useState('');
   const [bio, setBio] = useState('');
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
-  const [selectedAvatarName, setSelectedAvatarName] = useState<string | null>(null);
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(
+    null,
+  );
+  const [selectedAvatarName, setSelectedAvatarName] = useState<string | null>(
+    null,
+  );
   const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleCreateProfile = async () => {
     setIsLoading(true);
@@ -49,23 +49,19 @@ export default function SetupProfile() {
       const userId = await storage.getUserId();
       const defaultUsername = await storage.getUser();
 
-
       if (!storedToken || !userId) {
         throw new Error('Sessão inválida');
       }
 
-
       const headers = { Authorization: `Bearer ${storedToken}` };
       const finalNickname =
         nickname.trim() !== '' ? nickname.trim() : defaultUsername;
-
 
       await apiDev.post(
         '/profile',
         { nickname: finalNickname, bio: bio.trim(), userId },
         { headers },
       );
-
 
       if (selectedAvatarName) {
         await apiDev.patch(
@@ -75,13 +71,11 @@ export default function SetupProfile() {
         );
       }
 
-
       Toast.show({
         type: 'success',
         text1: 'Perfil Criado!',
         text2: 'Tudo pronto para sua jornada.',
       });
-
 
       navigation.reset({
         index: 0,
@@ -98,7 +92,6 @@ export default function SetupProfile() {
       setIsLoading(false);
     }
   };
-
 
   return (
     <SpaceBackgroundWrapper>
@@ -140,7 +133,6 @@ export default function SetupProfile() {
               </Text>
             </View>
 
-
             <View style={{ alignItems: 'center', marginBottom: gutters.xl }}>
               <TouchableOpacity
                 style={styles.avatarContainer}
@@ -176,7 +168,6 @@ export default function SetupProfile() {
               </Text>
             </View>
 
-
             <View style={{ gap: gutters.lg, marginBottom: gutters.xl * 2 }}>
               <View>
                 <Text style={styles.label}>Nickname (Opcional)</Text>
@@ -188,7 +179,6 @@ export default function SetupProfile() {
                   maxLength={20}
                 />
               </View>
-
 
               <View>
                 <Text style={styles.label}>Bio (Opcional)</Text>
@@ -203,7 +193,6 @@ export default function SetupProfile() {
               </View>
             </View>
 
-
             <TouchableOpacity
               onPress={handleCreateProfile}
               disabled={isLoading}
@@ -213,7 +202,9 @@ export default function SetupProfile() {
                 <ActivityIndicator color="#FFF" />
               ) : (
                 <>
-                  <Text style={styles.primaryButtonText}>Começar a Aventura</Text>
+                  <Text style={styles.primaryButtonText}>
+                    Começar a Aventura
+                  </Text>
                   <Feather name="arrow-right" size={20} color="#FFF" />
                 </>
               )}
@@ -221,7 +212,6 @@ export default function SetupProfile() {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-
 
       <AvatarPickerModal
         visible={isAvatarModalVisible}
@@ -236,7 +226,6 @@ export default function SetupProfile() {
     </SpaceBackgroundWrapper>
   );
 }
-
 
 const styles = StyleSheet.create({
   label: {

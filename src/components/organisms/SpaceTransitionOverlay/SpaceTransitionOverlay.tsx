@@ -1,11 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import {
-  Animated,
-  Easing,
-  Modal,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Animated, Easing, Modal, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 
@@ -78,7 +72,7 @@ function TwinkleStar({ star }: { star: Star }) {
             isInteraction: false,
           }),
         ]),
-      ])
+      ]),
     );
 
     animation.start();
@@ -122,7 +116,7 @@ export function SpaceTransitionOverlay({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
       }),
-    [ringRotate]
+    [ringRotate],
   );
 
   const sweepTranslate = useMemo(
@@ -131,7 +125,7 @@ export function SpaceTransitionOverlay({
         inputRange: [0, 1],
         outputRange: [-140, 140],
       }),
-    [sweep]
+    [sweep],
   );
 
   useEffect(() => {
@@ -167,7 +161,7 @@ export function SpaceTransitionOverlay({
         easing: Easing.linear,
         useNativeDriver: true,
         isInteraction: false,
-      })
+      }),
     );
 
     const pulseLoop = Animated.loop(
@@ -204,7 +198,7 @@ export function SpaceTransitionOverlay({
             isInteraction: false,
           }),
         ]),
-      ])
+      ]),
     );
 
     const sweepLoop = Animated.loop(
@@ -223,7 +217,7 @@ export function SpaceTransitionOverlay({
           useNativeDriver: true,
           isInteraction: false,
         }),
-      ])
+      ]),
     );
 
     rotationLoop.start();
@@ -244,7 +238,10 @@ export function SpaceTransitionOverlay({
       <Animated.View style={[styles.overlay, { opacity: fade }]}>
         <View style={styles.backdrop}>
           {STARS.map((star, index) => (
-            <TwinkleStar key={`${star.top}-${star.left}-${index}`} star={star} />
+            <TwinkleStar
+              key={`${star.top}-${star.left}-${index}`}
+              star={star}
+            />
           ))}
 
           <Animated.View
@@ -300,7 +297,10 @@ export function SpaceTransitionOverlay({
                 style={[
                   styles.sweepLine,
                   {
-                    transform: [{ translateX: sweepTranslate }, { rotate: '-20deg' }],
+                    transform: [
+                      { translateX: sweepTranslate },
+                      { rotate: '-20deg' },
+                    ],
                   },
                 ]}
               />
@@ -418,4 +418,4 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: '#E2E8F0',
   },
-}); 
+});

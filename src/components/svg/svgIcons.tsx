@@ -4,7 +4,6 @@ import Svg, {
   Path,
   Rect,
   Line,
-  Ellipse,
   Text as SvgText,
 } from 'react-native-svg';
 
@@ -395,7 +394,7 @@ export const RoubarIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-export const BuracoNegroIcon = ({ color }: { color: string }) => (
+export const BuracoNegroIcon = () => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
     <Circle cx="40" cy="40" r="10" fill="#000000" />
     <Circle

@@ -1,10 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View,
-  ScrollView,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, ScrollView, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { HomeHeader } from '@/components/organisms/HomeHeader';
 import { WelcomeMessage } from '@/components/organisms/WelcomeMessage';
@@ -114,7 +109,7 @@ export default function HomeScreen() {
       };
 
       fetchProfile();
-    }, [])
+    }, []),
   );
 
   const cardStyle = {
@@ -200,7 +195,10 @@ export default function HomeScreen() {
             paddingBottom: 96 + insets.bottom,
           }}
         >
-          <WelcomeMessage avatar={profile?.avatar} username={profile?.nickname} />
+          <WelcomeMessage
+            avatar={profile?.avatar}
+            username={profile?.nickname}
+          />
           <LevelBar
             level={profile?.level ?? 1}
             current={profile?.points ?? 0}
@@ -239,4 +237,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 4,
   },
-});   
+});
