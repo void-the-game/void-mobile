@@ -42,7 +42,7 @@ const getSocketURL = () => {
 
 let socket: Socket | null = null;
 
-export function getSocket(): Socket {
+export function getSocket(token?: string): Socket {
   if (!socket) {
     socket = io(getSocketURL(), {
       autoConnect: false,
@@ -51,7 +51,10 @@ export function getSocket(): Socket {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: Infinity,
+      auth: token ? { token } : undefined, // Initialize mapping token directly here if passed
     });
+  } else if (token) {
+    socket.auth = { token };
   }
   return socket;
 }
