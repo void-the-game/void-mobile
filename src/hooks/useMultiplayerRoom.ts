@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSocket, disconnectSocket } from '@/services/socket';
+import { storage } from '@/services/storage';
 import type {
   RoomPhase,
   LobbyPlayer,
@@ -86,9 +87,22 @@ export function useMultiplayerRoom() {
 
   useEffect(() => {
     const s = socketRef.current;
-    if (!s.connected) {
-      s.connect();
-    }
+
+    const connectSocket = async () => {
+      if (!s.connected) {
+        try {
+          const token = await storage.getToken();
+          if (token) {
+            s.auth = { token };
+          }
+        } catch (err) {
+          console.log('[MultiplayerRoom] Erro ao buscar token:', err);
+        }
+        s.connect();
+      }
+    };
+
+    connectSocket();
 
     s.on('connect', () => {
       set({ connected: true });
