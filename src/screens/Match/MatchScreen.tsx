@@ -12,6 +12,7 @@ import { storage } from '@/services/storage';
 import { apiDev } from '@/services/api';
 import { useMultiplayerRoom } from '@/hooks/useMultiplayerRoom';
 import { Paths } from '@/navigation/paths';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 import { InterruptModal } from '@/components/organisms/Match/InterruptModal';
 import { ForcedDiscardModal } from '@/components/organisms/Match/ForcedDiscardModal';
@@ -20,6 +21,7 @@ import { MatchHeader } from '@/components/organisms/Match/MatchHeader';
 import { OpponentList } from '@/components/organisms/Match/OpponentList';
 import { ActivityLogFeed } from '@/components/organisms/Match/ActivityLogFeed';
 import { PlayerHand } from '@/components/organisms/Match/PlayerHand';
+import { TableCenter } from '@/components/organisms/Match/TableCenter';
 
 export default function MatchScreen() {
   const { layout, colors, fonts } = useTheme();
@@ -31,7 +33,7 @@ export default function MatchScreen() {
   const [myNickname, setMyNickname] = useState('Tripulante');
 
   const {
-    gameState,
+    playerView,
     activityLog,
     interrupt,
     forcedDiscard,
@@ -45,6 +47,18 @@ export default function MatchScreen() {
     dismissInterrupt,
     dismissError,
   } = useMultiplayerRoom();
+
+  useEffect(() => {
+    // Força a tela para horizontal (Landscape)
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
+    return () => {
+      // Retorna para o padrão do app (Portrait) ao sair
+      ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -74,9 +88,13 @@ export default function MatchScreen() {
     }
   }, [error]);
 
-  const isMyTurn = gameState?.currentTurnPlayerId === myId;
-  const myHand: { id: string; type: string; color: string }[] =
-    (gameState as any)?.playerHands?.[myId ?? ''] ?? [];
+  const myPlayerIndex = playerView?.players.findIndex((p) => p.id === myId);
+  const isMyTurn =
+    playerView?.currentTurnIndex === myPlayerIndex &&
+    playerView?.phase === 'play';
+
+  const me = playerView?.players.find((p) => p.id === myId);
+  const myHand = Array.isArray(me?.hand) ? me.hand : [];
 
   if (gameOver) {
     return (
@@ -109,10 +127,15 @@ export default function MatchScreen() {
         />
 
         <OpponentList
-          opponents={
-            gameState?.players?.filter((p: any) => p.id !== myId) || []
+          opponents={playerView?.players?.filter((p) => p.id !== myId) || []}
+          currentTurnPlayerId={
+            playerView?.players?.[playerView?.currentTurnIndex]?.id
           }
-          currentTurnPlayerId={gameState?.currentTurnPlayerId}
+        />
+
+        <TableCenter
+          discardPile={playerView?.discardPile || []}
+          deckRemaining={playerView?.deck?.remaining || 0}
         />
 
         <ActivityLogFeed log={activityLog || []} />

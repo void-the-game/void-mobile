@@ -48,6 +48,7 @@ export default function LobbyScreen() {
     createRoom,
     joinRoom,
     leaveRoom,
+    startGame,
     dismissError,
   } = useMultiplayerRoom();
 
@@ -170,15 +171,17 @@ export default function LobbyScreen() {
   };
 
   const handleStartGame = () => {
-    Toast.show({
-      type: 'info',
-      text1: 'Partida em preparação',
-      text2:
-        'A conexão entre jogadores já funciona, mas o fluxo completo da partida ainda está em construção.',
-      visibilityTime: 2800,
-    });
+    // Toast.show({
+    //   type: 'info',
+    //   text1: 'Partida em preparação',
+    //   text2:
+    //     'A conexão entre jogadores já funciona, mas o fluxo completo da partida ainda está em construção.',
+    //   visibilityTime: 2800,
+    // });
 
-    setStartingMatch(false);
+    setStartingMatch(true);
+
+    startGame();
   };
 
   const handleShare = () => {
