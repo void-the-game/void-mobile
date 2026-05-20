@@ -46,6 +46,7 @@ const EV = {
 
 export type MultiplayerState = {
   connected: boolean;
+  mySocketId: string | null;
   phase: RoomPhase;
   roomId: string | null;
   roomCode: string | null;
@@ -64,6 +65,7 @@ export type MultiplayerState = {
 
 const INITIAL: MultiplayerState = {
   connected: false,
+  mySocketId: null,
   phase: 'waiting',
   roomId: null,
   roomCode: null,
@@ -132,7 +134,7 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
     connectSocket();
 
     s.on('connect', () => {
-      set({ connected: true });
+      set({ connected: true, mySocketId: s.id ?? null });
       const current = stateRef.current;
 
       // @ts-ignore
