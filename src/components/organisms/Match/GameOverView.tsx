@@ -87,9 +87,9 @@ export function GameOverView({
               { fontFamily: fonts.family.aldrich },
             ]}
           >
-            Voltar ao início
+            Voltar ao Lobby
           </Text>
-          <Feather name="home" size={18} color="white" />
+          <Feather name="users" size={18} color="white" />
         </TouchableOpacity>
       </ScrollView>
     </View>

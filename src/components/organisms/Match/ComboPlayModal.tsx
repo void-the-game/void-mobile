@@ -3,71 +3,77 @@ import { View, Modal, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/theme/hooks/useTheme';
+import { Card } from '@/types/multiplayer.types';
 import { translateCard } from '@/utils/cardTranslations';
 
-export function ForcedDiscardModal({
+export function ComboPlayModal({
   visible,
-  reason,
-  requiredColor,
+  comboCard,
   hand,
   onConfirm,
+  onCancel,
 }: {
   visible: boolean;
-  reason: 'vortex' | 'black_hole';
-  requiredColor: string;
-  hand: { id: string; type: string; color: string }[];
-  onConfirm: (ids: string[]) => void;
+  comboCard: Card | null;
+  hand: Card[];
+  onConfirm: (payload: {
+    recycleCardIds?: string[];
+    essenceCardId?: string;
+  }) => void;
+  onCancel: () => void;
 }) {
   const { colors, fonts } = useTheme();
   const [selected, setSelected] = useState<string[]>([]);
 
-  const isMatchColor = (c: { color: string; type: string }) =>
-    c.color === requiredColor || c.type === 'joker';
+  if (!comboCard) return null;
 
-  const toggle = (id: string) =>
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+  const isRecycle = comboCard.type === 'recycle';
+  const isExtraPower = comboCard.type === 'extra_power';
 
-  const isValidSubmit = () => {
-    if (reason === 'vortex') {
-      if (selected.length !== 1) return false;
-      const card = hand.find((c) => c.id === selected[0]);
-      return card && isMatchColor(card);
+  // Opções para reciclar: qualquer carta que não seja ela mesma (limitado a 1 ou pode ser mais? O guia diz "máximo 1 outra carta" no recycle)
+  // Opções para poder extra: essência da mesma cor ou curinga.
+  const options = hand.filter(
+    (c) =>
+      c.id !== comboCard.id &&
+      (isRecycle
+        ? true
+        : (c.type === 'essence' && c.color === comboCard.color) ||
+          c.type === 'joker'),
+  );
+
+  const toggle = (id: string) => {
+    if (isExtraPower) {
+      setSelected((prev) => (prev.includes(id) ? [] : [id])); // Só 1 permitida no Extra Power
     } else {
-      if (selected.length === 1) {
-        const card = hand.find((c) => c.id === selected[0]);
-        return card && isMatchColor(card);
-      }
-      if (selected.length === 2) {
-        return true; // Any 2 cards
-      }
-      return false;
+      setSelected((prev) => (prev.includes(id) ? [] : [id])); // Limitaremos a 1 carta para combinar
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="fade">
       <View style={modalStyles.overlay}>
         <View
           style={[
             modalStyles.sheet,
             {
               backgroundColor: colors.background,
-              borderColor: 'rgba(239,68,68,0.3)',
+              borderColor: 'rgba(59,130,246,0.3)',
             },
           ]}
         >
-          <View style={modalStyles.handle} />
           <View style={modalStyles.titleRow}>
-            <Feather name="trash-2" size={20} color="#EF4444" />
+            <Feather
+              name={isRecycle ? 'refresh-cw' : 'zap'}
+              size={20}
+              color="#60A5FA"
+            />
             <Text
               style={[
                 modalStyles.title,
-                { fontFamily: fonts.family.aldrich, color: '#EF4444' },
+                { fontFamily: fonts.family.aldrich, color: '#60A5FA' },
               ]}
             >
-              {reason === 'vortex' ? 'Vórtice!' : 'Buraco Negro!'}
+              {isRecycle ? 'Reciclar' : 'Poder Extra'}
             </Text>
           </View>
           <Text
@@ -76,18 +82,16 @@ export function ForcedDiscardModal({
               { fontFamily: fonts.family.aldrich, color: '#94A3B8' },
             ]}
           >
-            {reason === 'vortex'
-              ? `Descarte 1 carta da cor `
-              : `Descarte 1 carta da cor `}
-            <Text style={{ color: '#60A5FA' }}>{requiredColor}</Text>
-            {reason === 'black_hole' && ' ou 2 de qualquer cor.'}
+            {isRecycle
+              ? 'Deseja descartar junto mais alguma carta de sua mão?'
+              : 'Selecione uma essência da mesma cor ou Coringa para combar o poder, ou jogue sem combo.'}
           </Text>
 
           <ScrollView
             style={modalStyles.scrollView}
             contentContainerStyle={{ gap: 8 }}
           >
-            {hand.length === 0 ? (
+            {options.length === 0 ? (
               <View style={modalStyles.warningBox}>
                 <Feather
                   name="info"
@@ -101,26 +105,22 @@ export function ForcedDiscardModal({
                     { fontFamily: fonts.family.aldrich },
                   ]}
                 >
-                  Você não tem cartas para descartar. Aceite a punição.
+                  Você não possui cartas para combar. O efeito base será
+                  aplicado.
                 </Text>
               </View>
             ) : (
-              hand.map((card) => {
+              options.map((card) => {
                 const sel = selected.includes(card.id);
-                const highlight = isMatchColor(card);
                 return (
                   <Pressable
                     key={card.id}
                     style={[
                       modalStyles.optionBtn,
                       {
-                        borderColor: sel
-                          ? '#EF4444'
-                          : highlight
-                            ? 'rgba(59,130,246,0.5)'
-                            : 'rgba(148,163,184,0.2)',
+                        borderColor: sel ? '#60A5FA' : 'rgba(148,163,184,0.2)',
                         backgroundColor: sel
-                          ? 'rgba(239,68,68,0.1)'
+                          ? 'rgba(59,130,246,0.1)'
                           : 'rgba(59,130,246,0.02)',
                       },
                     ]}
@@ -139,44 +139,45 @@ export function ForcedDiscardModal({
                       style={[
                         modalStyles.optionText,
                         {
-                          color: highlight ? '#60A5FA' : '#94A3B8',
+                          color: sel ? '#60A5FA' : '#94A3B8',
                           fontFamily: fonts.family.aldrich,
                         },
                       ]}
                     >
                       {translateCard(card.type)}
                     </Text>
-                    {sel && <Feather name="check" size={16} color="#EF4444" />}
+                    {sel && <Feather name="check" size={16} color="#60A5FA" />}
                   </Pressable>
                 );
               })
             )}
           </ScrollView>
+
           <View style={modalStyles.btnRow}>
             <Pressable
               style={[modalStyles.primaryBtn, modalStyles.cancelBtn]}
-              onPress={() => onConfirm([])}
+              onPress={onCancel}
             >
               <Text
-                style={[
-                  modalStyles.cancelBtnText,
-                  { fontFamily: fonts.family.aldrich },
-                ]}
+                style={{
+                  color: '#E5E7EB',
+                  fontFamily: fonts.family.aldrich,
+                  fontSize: 13,
+                }}
               >
-                Aceitar Punição
+                Cancelar
               </Text>
             </Pressable>
 
             <Pressable
-              style={[
-                modalStyles.primaryBtn,
-                modalStyles.confirmBtn,
-                { opacity: isValidSubmit() ? 1 : 0.4 },
-              ]}
+              style={[modalStyles.primaryBtn, modalStyles.confirmBtn]}
               onPress={() => {
-                if (isValidSubmit()) onConfirm(selected);
+                if (isRecycle) {
+                  onConfirm({ recycleCardIds: selected });
+                } else {
+                  onConfirm({ essenceCardId: selected[0] });
+                }
               }}
-              disabled={!isValidSubmit()}
             >
               <Text
                 style={[
@@ -184,9 +185,9 @@ export function ForcedDiscardModal({
                   { fontFamily: fonts.family.aldrich },
                 ]}
               >
-                Descartar
+                Jogar Carta
               </Text>
-              <Feather name="arrow-right" size={18} color="white" />
+              <Feather name="play" size={16} color="white" />
             </Pressable>
           </View>
         </View>
@@ -199,23 +200,14 @@ const modalStyles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    padding: 20,
   },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderTopWidth: 1,
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    borderWidth: 1,
     padding: 24,
-    borderCurve: 'continuous',
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(148,163,184,0.3)',
-    alignSelf: 'center',
-    marginBottom: 20,
-    borderCurve: 'continuous',
   },
   titleRow: {
     flexDirection: 'row',
@@ -224,7 +216,7 @@ const modalStyles = StyleSheet.create({
     marginBottom: 8,
   },
   title: { fontSize: 18, fontWeight: '700' },
-  subtitle: { fontSize: 14, marginBottom: 16 },
+  subtitle: { fontSize: 13, marginBottom: 16, lineHeight: 18 },
   scrollView: {
     maxHeight: 200,
     marginBottom: 16,
@@ -235,9 +227,9 @@ const modalStyles = StyleSheet.create({
     gap: 10,
     borderWidth: 1.5,
     borderRadius: 12,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
     borderCurve: 'continuous',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   optionText: {
     fontSize: 14,
@@ -248,11 +240,11 @@ const modalStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
+    borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: 'rgba(239,68,68,0.25)',
     backgroundColor: 'rgba(239,68,68,0.08)',
     padding: 12,
-    borderCurve: 'continuous',
   },
   warningText: {
     color: '#FCA5A5',
@@ -269,22 +261,22 @@ const modalStyles = StyleSheet.create({
     borderColor: 'rgba(75,85,99,0.3)',
     borderWidth: 1,
   },
-  cancelBtnText: {
-    color: '#E5E7EB',
-    fontSize: 13,
-  },
   confirmBtn: {
     flex: 1,
-    backgroundColor: '#EF4444',
+    backgroundColor: '#60A5FA',
   },
   primaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 999,
-    gap: 8,
+    gap: 6,
+    padding: 14,
+    borderRadius: 12,
     borderCurve: 'continuous',
   },
-  primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '600' },
+  primaryBtnText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

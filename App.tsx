@@ -11,6 +11,7 @@ import {
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React from 'react';
+import { MultiplayerProvider } from '@/contexts/MultiplayerContext';
 
 export default function App() {
   const [aldrichLoaded] = useAldrich({ Aldrich_400Regular });
@@ -28,7 +29,9 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ApplicationNavigator />
+      <MultiplayerProvider>
+        <ApplicationNavigator />
+      </MultiplayerProvider>
     </GestureHandlerRootView>
   );
 }

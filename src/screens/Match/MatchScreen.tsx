@@ -1,172 +1,168 @@
-import React, { useEffect, useState } from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { Text } from '@/components/atoms/Text';
-import { useNavigation } from '@react-navigation/native';
-import { Feather } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 import { useTheme } from '@/theme/hooks/useTheme';
-import { HomeHeader } from '@/components/organisms/HomeHeader';
-import { storage } from '@/services/storage';
-import { apiDev } from '@/services/api';
 import { useMultiplayerRoom } from '@/hooks/useMultiplayerRoom';
+import { usePlayerProfile } from '@/hooks/usePlayerProfile';
+import { useMatchPlayer } from '@/hooks/useMatchPlayer';
+import { useCardPlay } from '@/hooks/useCardPlay';
+import { useValidInterrupts } from '@/hooks/useValidInterrupts';
 import { Paths } from '@/navigation/paths';
 
-import { InterruptModal } from '@/components/organisms/Match/InterruptModal';
-import { ForcedDiscardModal } from '@/components/organisms/Match/ForcedDiscardModal';
-import { GameOverView } from '@/components/organisms/Match/GameOverView';
-import { MatchHeader } from '@/components/organisms/Match/MatchHeader';
-import { OpponentList } from '@/components/organisms/Match/OpponentList';
-import { ActivityLogFeed } from '@/components/organisms/Match/ActivityLogFeed';
-import { PlayerHand } from '@/components/organisms/Match/PlayerHand';
+import {
+  InterruptModal,
+  ForcedDiscardModal,
+  GameOverView,
+  OpponentList,
+  ActivityLogFeed,
+  PlayerHand,
+  TableCenter,
+  ComboPlayModal,
+  MatchTopBar,
+  MatchSidePanel,
+} from '@/components/organisms/Match';
 
 export default function MatchScreen() {
-  const { layout, colors, fonts } = useTheme();
+  const { colors } = useTheme();
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
 
-  const [myId, setMyId] = useState<string | null>(null);
-  const [myAvatar, setMyAvatar] = useState<string | undefined>();
-  const [myNickname, setMyNickname] = useState('Tripulante');
+  const { myId, myAvatar, myNickname } = usePlayerProfile();
 
   const {
-    gameState,
+    playerView,
     activityLog,
     interrupt,
     forcedDiscard,
     gameOver,
+    mySocketId,
     error,
     playCard,
-    passTurn,
     playInterrupt,
     sendForcedDiscard,
     syncState,
     dismissInterrupt,
     dismissError,
+    resetToLobby,
   } = useMultiplayerRoom();
 
-  useEffect(() => {
-    const load = async () => {
-      const [id, token] = await Promise.all([
-        storage.getUserId(),
-        storage.getToken(),
-      ]);
-      setMyId(id);
-      if (id && token) {
-        try {
-          const res = await apiDev.get(`/profile/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.data?.profile?.avatar) setMyAvatar(res.data.profile.avatar);
-          if (res.data?.profile?.nickname)
-            setMyNickname(res.data.profile.nickname);
-        } catch {}
-      }
-    };
-    load();
-  }, []);
+  const { isMyTurn, myHand, opponents, currentTurnPlayerId } = useMatchPlayer({
+    playerView,
+    myId,
+    mySocketId,
+  });
 
+  const {
+    selectedCard,
+    pendingComboCard,
+    handleSelectCard,
+    handleConfirmPlay,
+    handleComboConfirmed,
+    handleCancelCombo,
+  } = useCardPlay({ playCard, currentTurnIndex: playerView?.currentTurnIndex });
+
+  const validInteractions = useValidInterrupts({ interrupt, myHand });
+
+  // Força Landscape ao focar na tela, restaura Portrait ao sair
+  useFocusEffect(
+    useCallback(() => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      return () => {
+        ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
+        );
+      };
+    }, []),
+  );
+
+  // Exibe erros via Toast
   useEffect(() => {
     if (error) {
       Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
       dismissError();
     }
-  }, [error]);
-
-  const isMyTurn = gameState?.currentTurnPlayerId === myId;
-  const myHand: { id: string; type: string; color: string }[] =
-    (gameState as any)?.playerHands?.[myId ?? ''] ?? [];
+  }, [error, dismissError]);
 
   if (gameOver) {
+    const isWinner =
+      gameOver.winnerId === myId || gameOver.winnerId === mySocketId;
     return (
       <GameOverView
-        won={gameOver.winnerId === myId}
+        won={isWinner}
         winnerName={gameOver.winnerName}
         myAvatar={myAvatar}
-        onGoHome={() => navigation.navigate(Paths.Home as never)}
+        onGoHome={() => {
+          resetToLobby();
+          navigation.navigate(Paths.Lobby as never);
+        }}
       />
     );
   }
 
   return (
-    <View style={[layout.flex_1, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      {/* ── Área Principal (esquerda) ─────────────────────────────── */}
       <ScrollView
-        style={layout.flex_1}
-        contentContainerStyle={{
-          paddingTop: insets.top + 8,
-          paddingBottom: 120,
-        }}
+        style={styles.mainArea}
+        contentContainerStyle={styles.mainContent}
         showsVerticalScrollIndicator={false}
       >
-        <HomeHeader />
-
-        <MatchHeader
-          myAvatar={myAvatar}
-          myNickname={myNickname}
-          isMyTurn={isMyTurn}
-          onSync={syncState}
-        />
+        <MatchTopBar nickname={myNickname} onSync={syncState} />
 
         <OpponentList
-          opponents={
-            gameState?.players?.filter((p: any) => p.id !== myId) || []
-          }
-          currentTurnPlayerId={gameState?.currentTurnPlayerId}
+          opponents={opponents}
+          currentTurnPlayerId={currentTurnPlayerId}
         />
 
-        <ActivityLogFeed log={activityLog || []} />
+        <TableCenter
+          discardPile={playerView?.discardPile ?? []}
+          deckRemaining={playerView?.deck?.remaining ?? 0}
+        />
 
         <PlayerHand
           hand={myHand}
           isMyTurn={isMyTurn}
-          onPlayCard={(cardId) => playCard({ cardId })}
+          selectedCardId={selectedCard?.id ?? null}
+          onSelectCard={handleSelectCard}
         />
+
+        <ActivityLogFeed log={activityLog ?? []} />
       </ScrollView>
 
-      {isMyTurn && (
-        <View
-          style={[
-            styles.footerBar,
-            {
-              borderTopColor: 'rgba(59,130,246,0.18)',
-              backgroundColor: colors.background,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: '#374151', flex: 1 }]}
-            onPress={passTurn}
-          >
-            <Feather name="skip-forward" size={16} color="white" />
-            <Text
-              style={[
-                styles.primaryBtnText,
-                { fontFamily: fonts.family.aldrich },
-              ]}
-            >
-              Passar turno
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* ── Painel Lateral de Ações (direita) ──────────────────────── */}
+      <MatchSidePanel
+        isMyTurn={isMyTurn}
+        selectedCard={selectedCard}
+        onConfirmPlay={handleConfirmPlay}
+      />
 
-      {interrupt && (
+      {/* ── Modais ───────────────────────────────────────────────────── */}
+      {interrupt ? (
         <InterruptModal
           visible={!!interrupt}
           attackerName={interrupt.attackerName}
           cardType={interrupt.cardType}
           timeoutMs={interrupt.timeoutMs}
-          availableResponses={interrupt.availableResponses}
+          availableResponses={validInteractions}
           onRespond={(cardId) => {
             playInterrupt(cardId);
             dismissInterrupt();
           }}
           onSkip={dismissInterrupt}
         />
-      )}
+      ) : null}
 
-      {forcedDiscard && (
+      <ComboPlayModal
+        visible={!!pendingComboCard}
+        comboCard={pendingComboCard}
+        hand={myHand}
+        onConfirm={handleComboConfirmed}
+        onCancel={handleCancelCombo}
+      />
+
+      {forcedDiscard ? (
         <ForcedDiscardModal
           visible={!!forcedDiscard}
           reason={forcedDiscard.reason}
@@ -174,26 +170,22 @@ export default function MatchScreen() {
           hand={myHand}
           onConfirm={sendForcedDiscard}
         />
-      )}
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  footerBar: {
+  root: {
+    flex: 1,
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    gap: 10,
   },
-  primaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 999,
-    gap: 8,
+  mainArea: {
+    flex: 1,
   },
-  primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '600' },
+  mainContent: {
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
 });
