@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { AstronautIcon } from '@/components/svg/svgIcons';
@@ -64,12 +64,11 @@ export function PlayerHand({
             const canInteract = isMyTurn;
 
             return (
-              <TouchableOpacity
+              <Pressable
                 key={card.id}
                 style={[
                   styles.cardBtn,
                   {
-                    // Borda usa a cor real da carta vindade do servidor
                     borderColor: isSelected
                       ? card.color
                       : canInteract
@@ -79,13 +78,11 @@ export function PlayerHand({
                       ? `${card.color}22`
                       : 'rgba(15,23,42,0.6)',
                     opacity: canInteract ? 1 : 0.4,
-                    // Carta selecionada sobe levemente
                     transform: [{ translateY: isSelected ? -8 : 0 }],
                   },
                 ]}
                 onPress={() => canInteract && onSelectCard(card)}
                 disabled={!canInteract}
-                activeOpacity={0.75}
               >
                 {/* Barra de cor no topo */}
                 <View
@@ -115,7 +112,7 @@ export function PlayerHand({
                     ]}
                   />
                 )}
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
@@ -136,6 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     borderRadius: 12,
+    borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
     borderStyle: 'dashed',
@@ -149,6 +147,7 @@ const styles = StyleSheet.create({
     width: 76,
     height: 108,
     borderRadius: 10,
+    borderCurve: 'continuous',
     borderWidth: 1.5,
     overflow: 'hidden',
     alignItems: 'center',

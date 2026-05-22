@@ -31,7 +31,7 @@ export function OpponentList({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 10 }}
+        contentContainerStyle={styles.listContent}
       >
         {opponents.map((player, i) => {
           // Acessa .count (se mandado pelo backend anonimizado) ou .length (se array real)
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
   opponentCard: {
     alignItems: 'center',
     borderRadius: 14,
+    borderCurve: 'continuous',
     borderWidth: 1,
     padding: 14,
     minWidth: 90,
@@ -121,4 +122,5 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   eliminatedText: { color: '#EF4444', fontSize: 9, fontWeight: '700' },
+  listContent: { gap: 10 },
 });

@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Modal,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import { View, Modal, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/theme/hooks/useTheme';
@@ -90,7 +84,7 @@ export function ForcedDiscardModal({
           </Text>
 
           <ScrollView
-            style={{ maxHeight: 200, marginBottom: 16 }}
+            style={modalStyles.scrollView}
             contentContainerStyle={{ gap: 8 }}
           >
             {hand.length === 0 ? (
@@ -102,12 +96,10 @@ export function ForcedDiscardModal({
                   style={{ marginRight: 8 }}
                 />
                 <Text
-                  style={{
-                    color: '#FCA5A5',
-                    fontFamily: fonts.family.aldrich,
-                    fontSize: 13,
-                    flex: 1,
-                  }}
+                  style={[
+                    modalStyles.warningText,
+                    { fontFamily: fonts.family.aldrich },
+                  ]}
                 >
                   Você não tem cartas para descartar. Aceite a punição.
                 </Text>
@@ -117,7 +109,7 @@ export function ForcedDiscardModal({
                 const sel = selected.includes(card.id);
                 const highlight = isMatchColor(card);
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={card.id}
                     style={[
                       modalStyles.optionBtn,
@@ -144,53 +136,42 @@ export function ForcedDiscardModal({
                       ]}
                     />
                     <Text
-                      style={{
-                        color: highlight ? '#60A5FA' : '#94A3B8',
-                        fontFamily: fonts.family.aldrich,
-                        fontSize: 14,
-                        flex: 1,
-                      }}
+                      style={[
+                        modalStyles.optionText,
+                        {
+                          color: highlight ? '#60A5FA' : '#94A3B8',
+                          fontFamily: fonts.family.aldrich,
+                        },
+                      ]}
                     >
                       {translateCard(card.type)}
                     </Text>
                     {sel && <Feather name="check" size={16} color="#EF4444" />}
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })
             )}
           </ScrollView>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity
-              style={[
-                modalStyles.primaryBtn,
-                {
-                  flex: 1,
-                  backgroundColor: 'rgba(55,65,81,0.3)',
-                  borderColor: 'rgba(75,85,99,0.3)',
-                  borderWidth: 1,
-                },
-              ]}
+          <View style={modalStyles.btnRow}>
+            <Pressable
+              style={[modalStyles.primaryBtn, modalStyles.cancelBtn]}
               onPress={() => onConfirm([])}
             >
               <Text
-                style={{
-                  color: '#E5E7EB',
-                  fontFamily: fonts.family.aldrich,
-                  fontSize: 13,
-                }}
+                style={[
+                  modalStyles.cancelBtnText,
+                  { fontFamily: fonts.family.aldrich },
+                ]}
               >
                 Aceitar Punição
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
+            <Pressable
               style={[
                 modalStyles.primaryBtn,
-                {
-                  flex: 1,
-                  opacity: isValidSubmit() ? 1 : 0.4,
-                  backgroundColor: '#EF4444',
-                },
+                modalStyles.confirmBtn,
+                { opacity: isValidSubmit() ? 1 : 0.4 },
               ]}
               onPress={() => {
                 if (isValidSubmit()) onConfirm(selected);
@@ -206,7 +187,7 @@ export function ForcedDiscardModal({
                 Descartar
               </Text>
               <Feather name="arrow-right" size={18} color="white" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -225,6 +206,7 @@ const modalStyles = StyleSheet.create({
     borderTopRightRadius: 24,
     borderTopWidth: 1,
     padding: 24,
+    borderCurve: 'continuous',
   },
   handle: {
     width: 36,
@@ -233,6 +215,7 @@ const modalStyles = StyleSheet.create({
     backgroundColor: 'rgba(148,163,184,0.3)',
     alignSelf: 'center',
     marginBottom: 20,
+    borderCurve: 'continuous',
   },
   titleRow: {
     flexDirection: 'row',
@@ -242,6 +225,10 @@ const modalStyles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: '700' },
   subtitle: { fontSize: 14, marginBottom: 16 },
+  scrollView: {
+    maxHeight: 200,
+    marginBottom: 16,
+  },
   optionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -250,6 +237,11 @@ const modalStyles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 13,
     paddingHorizontal: 16,
+    borderCurve: 'continuous',
+  },
+  optionText: {
+    fontSize: 14,
+    flex: 1,
   },
   colorDot: { width: 12, height: 12, borderRadius: 6 },
   warningBox: {
@@ -260,6 +252,30 @@ const modalStyles = StyleSheet.create({
     borderColor: 'rgba(239,68,68,0.25)',
     backgroundColor: 'rgba(239,68,68,0.08)',
     padding: 12,
+    borderCurve: 'continuous',
+  },
+  warningText: {
+    color: '#FCA5A5',
+    fontSize: 13,
+    flex: 1,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(55,65,81,0.3)',
+    borderColor: 'rgba(75,85,99,0.3)',
+    borderWidth: 1,
+  },
+  cancelBtnText: {
+    color: '#E5E7EB',
+    fontSize: 13,
+  },
+  confirmBtn: {
+    flex: 1,
+    backgroundColor: '#EF4444',
   },
   primaryBtn: {
     flexDirection: 'row',
@@ -268,6 +284,7 @@ const modalStyles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 999,
     gap: 8,
+    borderCurve: 'continuous',
   },
   primaryBtnText: { color: 'white', fontSize: 15, fontWeight: '600' },
 });

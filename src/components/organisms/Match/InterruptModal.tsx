@@ -1,11 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Modal,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-} from 'react-native';
+import { View, Modal, Pressable, Animated, StyleSheet } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/theme/hooks/useTheme';
@@ -95,7 +89,7 @@ export function InterruptModal({
           </View>
           <View style={{ gap: 8 }}>
             {availableResponses.map((card) => (
-              <TouchableOpacity
+              <Pressable
                 key={card.id}
                 style={[
                   modalStyles.optionBtn,
@@ -108,45 +102,33 @@ export function InterruptModal({
                 onPress={() => onRespond(card.id)}
               >
                 <View
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 6,
-                    backgroundColor:
-                      card.color === 'joker' ? '#D946EF' : card.color,
-                  }}
+                  style={[
+                    modalStyles.colorDot,
+                    {
+                      backgroundColor:
+                        card.color === 'joker' ? '#D946EF' : card.color,
+                    },
+                  ]}
                 />
                 <Text
-                  style={{
-                    color: '#F1F5F9',
-                    fontFamily: fonts.family.aldrich,
-                    fontSize: 14,
-                    flex: 1,
-                  }}
+                  style={[
+                    modalStyles.optionText,
+                    { fontFamily: fonts.family.aldrich },
+                  ]}
                 >
                   Jogar {translateCard(card.type)}
                 </Text>
                 <Feather name="chevron-right" size={16} color="#60A5FA" />
-              </TouchableOpacity>
+              </Pressable>
             ))}
 
             {availableResponses.length === 0 && (
-              <View
-                style={{
-                  padding: 12,
-                  backgroundColor: 'rgba(239,68,68,0.1)',
-                  borderRadius: 12,
-                  marginBottom: 8,
-                  borderWidth: 1,
-                  borderColor: 'rgba(239,68,68,0.2)',
-                }}
-              >
+              <View style={modalStyles.noResponseBox}>
                 <Text
-                  style={{
-                    fontFamily: fonts.family.aldrich,
-                    color: '#FCA5A5',
-                    fontSize: 13,
-                  }}
+                  style={[
+                    modalStyles.noResponseText,
+                    { fontFamily: fonts.family.aldrich },
+                  ]}
                 >
                   Você não tem cartas para se defender deste ataque (Defesa
                   Pontual). Aguarde o tempo ou aceite.
@@ -154,7 +136,7 @@ export function InterruptModal({
               </View>
             )}
 
-            <TouchableOpacity
+            <Pressable
               style={[
                 modalStyles.optionBtn,
                 {
@@ -165,15 +147,14 @@ export function InterruptModal({
               onPress={onSkip}
             >
               <Text
-                style={{
-                  color: '#64748B',
-                  fontFamily: fonts.family.aldrich,
-                  fontSize: 14,
-                }}
+                style={[
+                  modalStyles.optionText,
+                  { fontFamily: fonts.family.aldrich, color: '#64748B' },
+                ]}
               >
                 {availableResponses.length > 0 ? 'Não reagir' : 'Compreendo'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -190,6 +171,7 @@ const modalStyles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    borderCurve: 'continuous',
     borderTopWidth: 1,
     padding: 24,
   },
@@ -197,6 +179,7 @@ const modalStyles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
+    borderCurve: 'continuous',
     backgroundColor: 'rgba(148,163,184,0.3)',
     alignSelf: 'center',
     marginBottom: 20,
@@ -214,17 +197,48 @@ const modalStyles = StyleSheet.create({
     height: 4,
     backgroundColor: 'rgba(55,65,81,0.6)',
     borderRadius: 2,
+    borderCurve: 'continuous',
     marginBottom: 16,
     overflow: 'hidden',
   },
-  timerFill: { height: '100%', backgroundColor: '#EF4444', borderRadius: 2 },
+  timerFill: {
+    height: '100%',
+    backgroundColor: '#EF4444',
+    borderRadius: 2,
+    borderCurve: 'continuous',
+  },
   optionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     borderWidth: 1.5,
     borderRadius: 12,
+    borderCurve: 'continuous',
     paddingVertical: 13,
     paddingHorizontal: 16,
+  },
+  colorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderCurve: 'continuous',
+  },
+  optionText: {
+    color: '#F1F5F9',
+    fontSize: 14,
+    flex: 1,
+  },
+  noResponseBox: {
+    padding: 12,
+    backgroundColor: 'rgba(239,68,68,0.1)',
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.2)',
+  },
+  noResponseText: {
+    color: '#FCA5A5',
+    fontSize: 13,
   },
 });

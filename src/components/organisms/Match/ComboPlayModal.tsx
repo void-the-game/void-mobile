@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Modal,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import { View, Modal, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/theme/hooks/useTheme';
@@ -94,7 +88,7 @@ export function ComboPlayModal({
           </Text>
 
           <ScrollView
-            style={{ maxHeight: 200, marginBottom: 16 }}
+            style={modalStyles.scrollView}
             contentContainerStyle={{ gap: 8 }}
           >
             {options.length === 0 ? (
@@ -106,12 +100,10 @@ export function ComboPlayModal({
                   style={{ marginRight: 8 }}
                 />
                 <Text
-                  style={{
-                    color: '#FCA5A5',
-                    fontFamily: fonts.family.aldrich,
-                    fontSize: 13,
-                    flex: 1,
-                  }}
+                  style={[
+                    modalStyles.warningText,
+                    { fontFamily: fonts.family.aldrich },
+                  ]}
                 >
                   Você não possui cartas para combar. O efeito base será
                   aplicado.
@@ -121,7 +113,7 @@ export function ComboPlayModal({
               options.map((card) => {
                 const sel = selected.includes(card.id);
                 return (
-                  <TouchableOpacity
+                  <Pressable
                     key={card.id}
                     style={[
                       modalStyles.optionBtn,
@@ -144,33 +136,26 @@ export function ComboPlayModal({
                       ]}
                     />
                     <Text
-                      style={{
-                        color: sel ? '#60A5FA' : '#94A3B8',
-                        fontFamily: fonts.family.aldrich,
-                        fontSize: 14,
-                        flex: 1,
-                      }}
+                      style={[
+                        modalStyles.optionText,
+                        {
+                          color: sel ? '#60A5FA' : '#94A3B8',
+                          fontFamily: fonts.family.aldrich,
+                        },
+                      ]}
                     >
                       {translateCard(card.type)}
                     </Text>
                     {sel && <Feather name="check" size={16} color="#60A5FA" />}
-                  </TouchableOpacity>
+                  </Pressable>
                 );
               })
             )}
           </ScrollView>
 
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity
-              style={[
-                modalStyles.primaryBtn,
-                {
-                  flex: 1,
-                  backgroundColor: 'rgba(55,65,81,0.3)',
-                  borderColor: 'rgba(75,85,99,0.3)',
-                  borderWidth: 1,
-                },
-              ]}
+          <View style={modalStyles.btnRow}>
+            <Pressable
+              style={[modalStyles.primaryBtn, modalStyles.cancelBtn]}
               onPress={onCancel}
             >
               <Text
@@ -182,16 +167,10 @@ export function ComboPlayModal({
               >
                 Cancelar
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
-            <TouchableOpacity
-              style={[
-                modalStyles.primaryBtn,
-                {
-                  flex: 1,
-                  backgroundColor: '#60A5FA',
-                },
-              ]}
+            <Pressable
+              style={[modalStyles.primaryBtn, modalStyles.confirmBtn]}
               onPress={() => {
                 if (isRecycle) {
                   onConfirm({ recycleCardIds: selected });
@@ -209,7 +188,7 @@ export function ComboPlayModal({
                 Jogar Carta
               </Text>
               <Feather name="play" size={16} color="white" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -226,6 +205,7 @@ const modalStyles = StyleSheet.create({
   },
   sheet: {
     borderRadius: 20,
+    borderCurve: 'continuous',
     borderWidth: 1,
     padding: 24,
   },
@@ -237,24 +217,53 @@ const modalStyles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: '700' },
   subtitle: { fontSize: 13, marginBottom: 16, lineHeight: 18 },
+  scrollView: {
+    maxHeight: 200,
+    marginBottom: 16,
+  },
   optionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     borderWidth: 1.5,
     borderRadius: 12,
+    borderCurve: 'continuous',
     paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  optionText: {
+    fontSize: 14,
+    flex: 1,
   },
   colorDot: { width: 12, height: 12, borderRadius: 6 },
   warningBox: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
+    borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: 'rgba(239,68,68,0.25)',
     backgroundColor: 'rgba(239,68,68,0.08)',
     padding: 12,
+  },
+  warningText: {
+    color: '#FCA5A5',
+    fontSize: 13,
+    flex: 1,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(55,65,81,0.3)',
+    borderColor: 'rgba(75,85,99,0.3)',
+    borderWidth: 1,
+  },
+  confirmBtn: {
+    flex: 1,
+    backgroundColor: '#60A5FA',
   },
   primaryBtn: {
     flexDirection: 'row',
@@ -263,6 +272,7 @@ const modalStyles = StyleSheet.create({
     gap: 6,
     padding: 14,
     borderRadius: 12,
+    borderCurve: 'continuous',
   },
   primaryBtnText: {
     color: 'white',
