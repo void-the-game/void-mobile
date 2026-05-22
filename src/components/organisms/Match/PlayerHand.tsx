@@ -4,6 +4,7 @@ import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { AstronautIcon } from '@/components/svg/svgIcons';
 import { Card } from '@/types/multiplayer.types';
+import { translateCard } from '@/utils/cardTranslations';
 
 interface PlayerHandProps {
   hand: Card[];
@@ -100,9 +101,9 @@ export function PlayerHand({
                       color: isSelected ? '#F8FAFC' : '#CBD5E1',
                     },
                   ]}
-                  numberOfLines={3}
+                  numberOfLines={4}
                 >
-                  {card.type.replace(/_/g, '\n')}
+                  {translateCard(card.type).replace(/ /g, '\n')}
                 </Text>
 
                 {/* Indicador de seleção */}

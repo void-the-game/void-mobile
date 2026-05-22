@@ -4,6 +4,7 @@ import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { Card } from '@/types/multiplayer.types';
 import { AstronautIcon } from '@/components/svg/svgIcons';
+import { translateCard } from '@/utils/cardTranslations';
 
 interface TableCenterProps {
   discardPile: Card[];
@@ -43,7 +44,7 @@ export function TableCenter({ discardPile, deckRemaining }: TableCenterProps) {
             <Text
               style={[styles.cardType, { fontFamily: fonts.family.aldrich }]}
             >
-              {topCard.type}
+              {translateCard(topCard.type).replace(/ /g, '\n')}
             </Text>
           </View>
         ) : (

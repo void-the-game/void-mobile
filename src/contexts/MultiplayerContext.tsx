@@ -93,6 +93,7 @@ export interface MultiplayerContextValue extends MultiplayerState {
   sendForcedDiscard: (cardIds: string[]) => void;
   syncState: () => void;
   leaveRoom: () => void;
+  resetToLobby: () => void;
   dismissInterrupt: () => void;
   dismissError: () => void;
 }
@@ -334,6 +335,18 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
     setState(INITIAL);
   }, [state.roomId]);
 
+  const resetToLobby = useCallback(() => {
+    set({
+      phase: 'waiting',
+      playerView: null,
+      gameOver: null,
+      error: null,
+      activityLog: [],
+      interrupt: null,
+      forcedDiscard: null,
+    });
+  }, [set]);
+
   const dismissInterrupt = useCallback(() => set({ interrupt: null }), [set]);
   const dismissError = useCallback(() => set({ error: null }), [set]);
 
@@ -348,6 +361,7 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
     sendForcedDiscard,
     syncState,
     leaveRoom,
+    resetToLobby,
     dismissInterrupt,
     dismissError,
   };

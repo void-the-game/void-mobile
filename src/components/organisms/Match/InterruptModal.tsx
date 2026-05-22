@@ -9,6 +9,8 @@ import {
 import { Text } from '@/components/atoms/Text';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/theme/hooks/useTheme';
+import { translateCard } from '@/utils/cardTranslations';
+import { Card } from '@/types/multiplayer.types';
 
 const CARD = {
   backgroundColor: 'rgba(59,130,246,0.08)',
@@ -20,7 +22,7 @@ export function InterruptModal({
   attackerName,
   cardType,
   timeoutMs,
-  availableResponses,
+  availableResponses = [],
   onRespond,
   onSkip,
 }: {
@@ -28,7 +30,7 @@ export function InterruptModal({
   attackerName: string;
   cardType: string;
   timeoutMs: number;
-  availableResponses: string[];
+  availableResponses?: Card[];
   onRespond: (cardId: string) => void;
   onSkip: () => void;
 }) {
@@ -82,7 +84,9 @@ export function InterruptModal({
             ]}
           >
             <Text style={{ color: '#60A5FA' }}>{attackerName}</Text> jogou{' '}
-            {cardType}
+            <Text style={{ color: '#F1F5F9', fontWeight: 'bold' }}>
+              {translateCard(cardType)}
+            </Text>
           </Text>
           <View style={modalStyles.timerTrack}>
             <Animated.View
@@ -90,25 +94,66 @@ export function InterruptModal({
             />
           </View>
           <View style={{ gap: 8 }}>
-            {availableResponses.map((cardId) => (
+            {availableResponses.map((card) => (
               <TouchableOpacity
-                key={cardId}
-                style={[modalStyles.optionBtn, CARD]}
-                onPress={() => onRespond(cardId)}
+                key={card.id}
+                style={[
+                  modalStyles.optionBtn,
+                  CARD,
+                  {
+                    borderColor:
+                      card.color === 'joker' ? '#D946EF' : card.color,
+                  },
+                ]}
+                onPress={() => onRespond(card.id)}
               >
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 6,
+                    backgroundColor:
+                      card.color === 'joker' ? '#D946EF' : card.color,
+                  }}
+                />
                 <Text
                   style={{
-                    color: '#60A5FA',
+                    color: '#F1F5F9',
                     fontFamily: fonts.family.aldrich,
                     fontSize: 14,
                     flex: 1,
                   }}
                 >
-                  {cardId}
+                  Jogar {translateCard(card.type)}
                 </Text>
                 <Feather name="chevron-right" size={16} color="#60A5FA" />
               </TouchableOpacity>
             ))}
+
+            {availableResponses.length === 0 && (
+              <View
+                style={{
+                  padding: 12,
+                  backgroundColor: 'rgba(239,68,68,0.1)',
+                  borderRadius: 12,
+                  marginBottom: 8,
+                  borderWidth: 1,
+                  borderColor: 'rgba(239,68,68,0.2)',
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: fonts.family.aldrich,
+                    color: '#FCA5A5',
+                    fontSize: 13,
+                  }}
+                >
+                  Você não tem cartas para se defender deste ataque (Defesa
+                  Pontual). Aguarde o tempo ou aceite.
+                </Text>
+              </View>
+            )}
+
             <TouchableOpacity
               style={[
                 modalStyles.optionBtn,
@@ -126,7 +171,7 @@ export function InterruptModal({
                   fontSize: 14,
                 }}
               >
-                Não reagir
+                {availableResponses.length > 0 ? 'Não reagir' : 'Compreendo'}
               </Text>
             </TouchableOpacity>
           </View>

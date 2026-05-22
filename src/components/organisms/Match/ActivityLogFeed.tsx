@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 import type { PublicActionPayload } from '@/types/multiplayer.types';
+import { translateLog } from '@/utils/cardTranslations';
 
 const CARD = {
   backgroundColor: 'rgba(59,130,246,0.08)',
@@ -41,7 +42,7 @@ export function ActivityLogFeed({ log }: { log: PublicActionPayload[] }) {
             >
               <Text style={{ color: '#60A5FA' }}>{item.playerName}</Text>
               {' — '}
-              {item.effectDescription}
+              {translateLog(item.effectDescription)}
             </Text>
           </View>
         ))}

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/components/atoms/Text';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -20,6 +20,8 @@ import { OpponentList } from '@/components/organisms/Match/OpponentList';
 import { ActivityLogFeed } from '@/components/organisms/Match/ActivityLogFeed';
 import { PlayerHand } from '@/components/organisms/Match/PlayerHand';
 import { TableCenter } from '@/components/organisms/Match/TableCenter';
+import { ComboPlayModal } from '@/components/organisms/Match/ComboPlayModal';
+import { translateCard } from '@/utils/cardTranslations';
 
 export default function MatchScreen() {
   const { colors, fonts } = useTheme();
@@ -29,6 +31,7 @@ export default function MatchScreen() {
   const [myAvatar, setMyAvatar] = useState<string | undefined>();
   const [myNickname, setMyNickname] = useState('Tripulante');
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [pendingComboCard, setPendingComboCard] = useState<Card | null>(null);
 
   const {
     playerView,
@@ -39,23 +42,25 @@ export default function MatchScreen() {
     mySocketId,
     error,
     playCard,
-    passTurn,
     playInterrupt,
     sendForcedDiscard,
     syncState,
     dismissInterrupt,
     dismissError,
+    resetToLobby,
   } = useMultiplayerRoom();
 
-  // Força Landscape ao montar, restaura Portrait ao desmontar
-  useEffect(() => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-    return () => {
-      ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.PORTRAIT_UP,
-      );
-    };
-  }, []);
+  // Força Landscape ao focar na tela, restaura Portrait ao sair
+  useFocusEffect(
+    useCallback(() => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      return () => {
+        ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
+        );
+      };
+    }, []),
+  );
 
   // Carrega perfil do jogador
   useEffect(() => {
@@ -129,17 +134,62 @@ export default function MatchScreen() {
   // ─── Confirmar jogada de carta selecionada ───────────────────────────────────
   const handleConfirmPlay = () => {
     if (!selectedCard) return;
+
+    // Se for uma carta com opção de combo, abrimos a modal de combo
+    if (
+      selectedCard.type === 'recycle' ||
+      selectedCard.type === 'extra_power'
+    ) {
+      setPendingComboCard(selectedCard);
+      return;
+    }
+
     playCard({ cardId: selectedCard.id });
     setSelectedCard(null);
   };
 
+  const handleComboConfirmed = (payload: {
+    recycleCardIds?: string[];
+    essenceCardId?: string;
+  }) => {
+    if (!pendingComboCard) return;
+    playCard({
+      cardId: pendingComboCard.id,
+      ...payload,
+    });
+    setPendingComboCard(null);
+    setSelectedCard(null);
+  };
+
+  // ─── Calcular Respostas Válidas ao Interrupt localmente ──────────────────────
+  let validInteractions: Card[] = [];
+  if (interrupt && myHand) {
+    const attackType = interrupt.cardType;
+    let allowedTypes: string[] = [];
+    if (attackType.startsWith('steal_')) {
+      allowedTypes = ['nullify', 'block_steal', 'reflect'];
+    } else if (
+      attackType.startsWith('swap') ||
+      attackType === 'vortex' ||
+      attackType === 'black_hole'
+    ) {
+      allowedTypes = ['nullify'];
+    }
+    validInteractions = myHand.filter((c) => allowedTypes.includes(c.type));
+  }
+
   if (gameOver) {
+    const isWinner =
+      gameOver.winnerId === myId || gameOver.winnerId === mySocketId;
     return (
       <GameOverView
-        won={gameOver.winnerId === myId}
+        won={isWinner}
         winnerName={gameOver.winnerName}
         myAvatar={myAvatar}
-        onGoHome={() => navigation.navigate(Paths.Home as never)}
+        onGoHome={() => {
+          resetToLobby();
+          navigation.navigate(Paths.Lobby as never);
+        }}
       />
     );
   }
@@ -244,7 +294,7 @@ export default function MatchScreen() {
               ]}
               numberOfLines={2}
             >
-              {selectedCard.type}
+              {translateCard(selectedCard.type)}
             </Text>
           </View>
         )}
@@ -277,38 +327,6 @@ export default function MatchScreen() {
             Jogar Carta
           </Text>
         </TouchableOpacity>
-
-        {/* Divisor */}
-        <View style={styles.divider} />
-
-        {/* Botão Passar Turno */}
-        <TouchableOpacity
-          style={[
-            styles.actionBtn,
-            styles.secondaryBtn,
-            !isMyTurn && styles.disabledBtn,
-          ]}
-          onPress={passTurn}
-          disabled={!isMyTurn}
-          activeOpacity={0.8}
-        >
-          <Feather
-            name="skip-forward"
-            size={14}
-            color={!isMyTurn ? '#4B5563' : '#94A3B8'}
-          />
-          <Text
-            style={[
-              styles.actionBtnText,
-              {
-                fontFamily: fonts.family.aldrich,
-                color: !isMyTurn ? '#4B5563' : '#94A3B8',
-              },
-            ]}
-          >
-            Passar
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* ── Modais ───────────────────────────────────────────────────── */}
@@ -318,7 +336,7 @@ export default function MatchScreen() {
           attackerName={interrupt.attackerName}
           cardType={interrupt.cardType}
           timeoutMs={interrupt.timeoutMs}
-          availableResponses={interrupt.availableResponses}
+          availableResponses={validInteractions}
           onRespond={(cardId) => {
             playInterrupt(cardId);
             dismissInterrupt();
@@ -326,6 +344,14 @@ export default function MatchScreen() {
           onSkip={dismissInterrupt}
         />
       )}
+
+      <ComboPlayModal
+        visible={!!pendingComboCard}
+        comboCard={pendingComboCard}
+        hand={myHand}
+        onConfirm={handleComboConfirmed}
+        onCancel={() => setPendingComboCard(null)}
+      />
 
       {forcedDiscard && (
         <ForcedDiscardModal
