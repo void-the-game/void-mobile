@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   playerInfo: {
     position: 'absolute',
     bottom: 10,
-    left: 12,
+    left: 45,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
