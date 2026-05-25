@@ -166,6 +166,12 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
         roomId: payload.roomId,
         roomCode: payload.code,
         phase: 'waiting',
+        gameOver: null,
+        playerView: null,
+        activityLog: [],
+        interrupt: null,
+        forcedDiscard: null,
+        error: null,
       });
     });
 
@@ -173,6 +179,7 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
       set({
         players: payload.players,
         phase: 'waiting',
+        gameOver: null,
       });
       setState((prev) => {
         if (!prev.roomCode && prev.joiningRoomCode) {
@@ -267,6 +274,12 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
               roomCode: code,
               roomId: response.roomId || null,
               phase: 'waiting',
+              gameOver: null,
+              playerView: null,
+              activityLog: [],
+              interrupt: null,
+              forcedDiscard: null,
+              error: null,
             });
           }
         },
@@ -332,7 +345,13 @@ export function MultiplayerProvider({ children }: { children: ReactNode }) {
   const leaveRoom = useCallback(() => {
     if (!state.roomId) return;
     socketRef.current.emit(EV.ROOM_LEAVE, { roomId: state.roomId });
-    setState(INITIAL);
+
+    // Limpar o estado preservando a conexão do socket
+    setState((prev) => ({
+      ...INITIAL,
+      connected: prev.connected,
+      mySocketId: prev.mySocketId,
+    }));
   }, [state.roomId]);
 
   const resetToLobby = useCallback(() => {

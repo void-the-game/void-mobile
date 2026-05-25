@@ -1,6 +1,7 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 import Toast from 'react-native-toast-message';
 import * as ScreenOrientation from 'expo-screen-orientation';
 
@@ -10,24 +11,29 @@ import { usePlayerProfile } from '@/hooks/usePlayerProfile';
 import { useMatchPlayer } from '@/hooks/useMatchPlayer';
 import { useCardPlay } from '@/hooks/useCardPlay';
 import { useValidInterrupts } from '@/hooks/useValidInterrupts';
+import { useCardTimer } from '@/hooks/useCardTimer';
 import { Paths } from '@/navigation/paths';
+import { StarField } from '@/components/molecules/StarField';
+import { FloatingGlowDots } from '@/components/organisms/FloatingGlowDots/FloatingGlowDots';
+import { generateStarCoordinates } from '@/utils/generateStarCoordinates';
 
 import {
   InterruptModal,
   ForcedDiscardModal,
   GameOverView,
-  OpponentList,
-  ActivityLogFeed,
-  PlayerHand,
-  TableCenter,
   ComboPlayModal,
-  MatchTopBar,
-  MatchSidePanel,
+  OpponentArea,
+  TableArea,
+  PlayerArea,
+  HUDOverlay,
+  ActivityLogOverlay,
 } from '@/components/organisms/Match';
 
 export default function MatchScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation();
+
+  const stars = useMemo(() => generateStarCoordinates({ quantity: 30 }), []);
 
   const { myId, myAvatar, myNickname } = usePlayerProfile();
 
@@ -48,11 +54,12 @@ export default function MatchScreen() {
     resetToLobby,
   } = useMultiplayerRoom();
 
-  const { isMyTurn, myHand, opponents, currentTurnPlayerId } = useMatchPlayer({
-    playerView,
-    myId,
-    mySocketId,
-  });
+  const { isMyTurn, myHand, opponents, currentTurnPlayerId, me } =
+    useMatchPlayer({
+      playerView,
+      myId,
+      mySocketId,
+    });
 
   const {
     selectedCard,
@@ -64,6 +71,16 @@ export default function MatchScreen() {
   } = useCardPlay({ playCard, currentTurnIndex: playerView?.currentTurnIndex });
 
   const validInteractions = useValidInterrupts({ interrupt, myHand });
+
+  const { progress: timerProgress } = useCardTimer({
+    isMyTurn,
+    myHand,
+    currentTurnIndex: playerView?.currentTurnIndex,
+    onAutoPlay: (card) => {
+      // Chama playCard diretamente com o cardId — sem depender do estado selectedCard
+      playCard({ cardId: card.id });
+    },
+  });
 
   // Força Landscape ao focar na tela, restaura Portrait ao sair
   useFocusEffect(
@@ -103,40 +120,39 @@ export default function MatchScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* ── Área Principal (esquerda) ─────────────────────────────── */}
-      <ScrollView
-        style={styles.mainArea}
-        contentContainerStyle={styles.mainContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <MatchTopBar nickname={myNickname} onSync={syncState} />
+      <StatusBar hidden />
+      {/* Fundo espacial */}
+      <StarField stars={stars} style={StyleSheet.absoluteFillObject} />
+      <FloatingGlowDots />
+      <OpponentArea
+        opponent={opponents[0]}
+        isOpponentTurn={currentTurnPlayerId === opponents[0]?.id}
+      />
 
-        <OpponentList
-          opponents={opponents}
-          currentTurnPlayerId={currentTurnPlayerId}
-        />
+      <TableArea
+        discardPile={playerView?.discardPile ?? []}
+        deckRemaining={playerView?.deck?.remaining ?? 0}
+      />
 
-        <TableCenter
-          discardPile={playerView?.discardPile ?? []}
-          deckRemaining={playerView?.deck?.remaining ?? 0}
-        />
+      <PlayerArea
+        hand={myHand}
+        isMyTurn={isMyTurn}
+        selectedCardId={selectedCard?.id ?? null}
+        onSelectCard={handleSelectCard}
+        playerName={myNickname}
+        playerAvatar={me?.avatar ?? myAvatar}
+      />
 
-        <PlayerHand
-          hand={myHand}
-          isMyTurn={isMyTurn}
-          selectedCardId={selectedCard?.id ?? null}
-          onSelectCard={handleSelectCard}
-        />
-
-        <ActivityLogFeed log={activityLog ?? []} />
-      </ScrollView>
-
-      {/* ── Painel Lateral de Ações (direita) ──────────────────────── */}
-      <MatchSidePanel
+      <HUDOverlay
         isMyTurn={isMyTurn}
         selectedCard={selectedCard}
+        nickname={myNickname}
         onConfirmPlay={handleConfirmPlay}
+        onSync={syncState}
+        timerProgress={timerProgress}
       />
+
+      <ActivityLogOverlay log={activityLog ?? []} />
 
       {/* ── Modais ───────────────────────────────────────────────────── */}
       {interrupt ? (
@@ -178,14 +194,7 @@ export default function MatchScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    flexDirection: 'row',
-  },
-  mainArea: {
-    flex: 1,
-  },
-  mainContent: {
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 16,
+    flexDirection: 'column',
+    position: 'relative',
   },
 });

@@ -1,11 +1,17 @@
 export { ActivityLogFeed } from './ActivityLogFeed';
+export { ActivityLogOverlay } from './ActivityLogOverlay';
+export { CardBack } from './CardBack';
 export { ComboPlayModal } from './ComboPlayModal';
 export { ForcedDiscardModal } from './ForcedDiscardModal';
 export { GameOverView } from './GameOverView';
+export { HUDOverlay } from './HUDOverlay';
 export { InterruptModal } from './InterruptModal';
 export { MatchHeader } from './MatchHeader';
 export { MatchSidePanel } from './MatchSidePanel';
 export { MatchTopBar } from './MatchTopBar';
+export { OpponentArea } from './OpponentArea';
 export { OpponentList } from './OpponentList';
+export { PlayerArea } from './PlayerArea';
 export { PlayerHand } from './PlayerHand';
+export { TableArea } from './TableArea';
 export { TableCenter } from './TableCenter';
