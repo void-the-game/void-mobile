@@ -65,3 +65,22 @@ export function disconnectSocket() {
     socket = null;
   }
 }
+
+/**
+ * Updates the JWT on the existing socket and forces a reconnect so the
+ * server re-authenticates with the new user's token. This must be called
+ * after login so the socket session is bound to the correct user profile.
+ *
+ * We intentionally do NOT destroy the singleton here — the MultiplayerProvider
+ * holds a ref to this same instance and would lose all event listeners if we
+ * replaced it.
+ */
+export function updateSocketToken(token: string) {
+  if (socket) {
+    socket.auth = { token };
+    if (socket.connected) {
+      socket.disconnect();
+      socket.connect();
+    }
+  }
+}
