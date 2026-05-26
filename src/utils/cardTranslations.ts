@@ -119,3 +119,68 @@ export function translateLog(text: string): string {
 
   return translated;
 }
+
+// ─── Mapeamento CardType → ícone SVG ─────────────────────────────────────────
+// Retorna o nome do componente de ícone correspondente ao tipo de carta.
+// Usado pelo PlayerArea e TableArea para renderizar o ícone correto em cada carta.
+export type CardIconName =
+  | 'EssenciaIcon'
+  | 'CoringaIcon'
+  | 'ComprarIcon'
+  | 'ComprarUmIcon'
+  | 'RoubarIcon'
+  | 'RoubarUmIcon'
+  | 'BloqueiaRouboIcon'
+  | 'BloqueiaCompraIcon'
+  | 'RefletirIcon'
+  | 'ArmadilhaIcon'
+  | 'BuracoNegroIcon'
+  | 'VorticeIcon'
+  | 'ReciclarIcon'
+  | 'PoderExtraIcon'
+  | 'NulificarIcon'
+  | 'TrocarProximoIcon'
+  | 'TrocarAnteriorIcon'
+  | 'TrocarLivreIcon';
+
+export const CARD_ICON_MAP: Record<string, CardIconName> = {
+  essence: 'EssenciaIcon',
+  joker: 'CoringaIcon',
+  buy_plus_1: 'ComprarUmIcon',
+  buy_plus_2: 'ComprarIcon',
+  steal_next_1: 'RoubarUmIcon',
+  steal_next_2: 'RoubarIcon',
+  steal_prev_1: 'RoubarUmIcon',
+  steal_prev_2: 'RoubarIcon',
+  steal_any_1: 'RoubarUmIcon',
+  block_steal: 'BloqueiaRouboIcon',
+  block_purchase: 'BloqueiaCompraIcon',
+  reflect: 'RefletirIcon',
+  trap: 'ArmadilhaIcon',
+  black_hole: 'BuracoNegroIcon',
+  vortex: 'VorticeIcon',
+  recycle: 'ReciclarIcon',
+  extra_power: 'PoderExtraIcon',
+  nullify: 'NulificarIcon',
+  swap_next_hand: 'TrocarProximoIcon',
+  swap_prev_hand: 'TrocarAnteriorIcon',
+  swap_any_hand: 'TrocarLivreIcon',
+};
+
+/** Cores de fundo claras (do servidor) que precisam de texto preto */
+const LIGHT_CARD_COLORS = new Set([
+  'yellow',
+  'white',
+  '#F59E0B',
+  '#D1D5DB',
+  '#FBBF24',
+]);
+
+export function getCardIconName(type: string): CardIconName {
+  return CARD_ICON_MAP[type] ?? 'EssenciaIcon';
+}
+
+/** Retorna '#000000' para cores claras, '#FFFFFF' para escuras */
+export function getCardTextColor(color: string): string {
+  return LIGHT_CARD_COLORS.has(color) ? '#000000' : '#FFFFFF';
+}

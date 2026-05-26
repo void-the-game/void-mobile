@@ -17,6 +17,7 @@ import { apiDev } from '@/services/api';
 import Toast from 'react-native-toast-message';
 import { useState } from 'react';
 import { storage } from '@/services/storage';
+import { updateSocketToken } from '@/services/socket';
 
 type Navigation = StackNavigationProp<RootStackParamList>;
 
@@ -58,6 +59,9 @@ export default function SignIn() {
         await storage.saveToken(accessToken);
         await storage.saveUser(username);
         await storage.saveUserId(id);
+
+        // Atualiza o token no socket existente e força reconexão com o novo usuário
+        updateSocketToken(accessToken);
 
         try {
           // Checa se o usuário já tem um profile

@@ -324,7 +324,47 @@ export const RefletirIcon = () => (
   </Svg>
 );
 
-export const ComprarIcon = ({ color }: { color: string }) => (
+/**
+ * Ícone de Comprar/Roubar com fundo colorido e texto +1/+2.
+ * textColor controla a cor do texto — passe '#000000' para fundos claros.
+ */
+export const ComprarRoubarIcon = ({
+  color,
+  label,
+  textColor = '#FFFFFF',
+  size = 80,
+}: {
+  color: string;
+  label: '+1' | '+2';
+  textColor?: string;
+  size?: number;
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 80 80">
+    <Rect x="22.5" y="15" width="35" height="50" rx="4" fill={color} />
+    <SvgText
+      x="40"
+      y="48"
+      fontSize="26"
+      fill={textColor}
+      fontWeight="bold"
+      textAnchor="middle"
+    >
+      {label}
+    </SvgText>
+  </Svg>
+);
+
+/**
+ * Ícone de Comprar +2: dois retângulos sobrepostos (visual original do tutorial).
+ * Usado como alias para manter compatibilidade com TutorialScreen.
+ */
+export const ComprarIcon = ({
+  color,
+  textColor = '#FFFFFF',
+}: {
+  color: string;
+  textColor?: string;
+}) => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
     <Rect
       x="15"
@@ -339,7 +379,7 @@ export const ComprarIcon = ({ color }: { color: string }) => (
       x="32.5"
       y="52"
       fontSize="18"
-      fill="#ffffffff"
+      fill={textColor}
       fontWeight="bold"
       textAnchor="middle"
     >
@@ -350,7 +390,7 @@ export const ComprarIcon = ({ color }: { color: string }) => (
       x="47.5"
       y="47"
       fontSize="18"
-      fill="#ffffffff"
+      fill={textColor}
       fontWeight="bold"
       textAnchor="middle"
     >
@@ -359,7 +399,13 @@ export const ComprarIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-export const RoubarIcon = ({ color }: { color: string }) => (
+export const RoubarIcon = ({
+  color,
+  textColor = '#FFFFFF',
+}: {
+  color: string;
+  textColor?: string;
+}) => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
     <Rect
       x="15"
@@ -374,7 +420,7 @@ export const RoubarIcon = ({ color }: { color: string }) => (
       x="32.5"
       y="52"
       fontSize="18"
-      fill="#ffffffff"
+      fill={textColor}
       fontWeight="bold"
       textAnchor="middle"
     >
@@ -385,7 +431,7 @@ export const RoubarIcon = ({ color }: { color: string }) => (
       x="47.5"
       y="47"
       fontSize="18"
-      fill="#ffffffff"
+      fill={textColor}
       fontWeight="bold"
       textAnchor="middle"
     >
@@ -394,7 +440,7 @@ export const RoubarIcon = ({ color }: { color: string }) => (
   </Svg>
 );
 
-export const BuracoNegroIcon = () => (
+export const BuracoNegroIcon = ({ color = '#FFFFFF' }: { color?: string }) => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
     <Circle cx="40" cy="40" r="10" fill="#000000" />
     <Circle
@@ -402,7 +448,7 @@ export const BuracoNegroIcon = () => (
       cy="40"
       r="16"
       fill="none"
-      stroke="#FFFFFF"
+      stroke={color}
       strokeWidth="2.5"
       opacity="0.8"
     />
@@ -411,24 +457,24 @@ export const BuracoNegroIcon = () => (
       cy="40"
       r="22"
       fill="none"
-      stroke="#FFFFFF"
+      stroke={color}
       strokeWidth="2"
       opacity="0.5"
     />
-    <Circle cx="30" cy="30" r="2" fill="#FFFFFF" opacity="0.7" />
-    <Circle cx="50" cy="32" r="2" fill="#FFFFFF" opacity="0.7" />
-    <Circle cx="28" cy="50" r="2" fill="#FFFFFF" opacity="0.7" />
-    <Circle cx="52" cy="48" r="2" fill="#FFFFFF" opacity="0.7" />
+    <Circle cx="30" cy="30" r="2" fill={color} opacity="0.7" />
+    <Circle cx="50" cy="32" r="2" fill={color} opacity="0.7" />
+    <Circle cx="28" cy="50" r="2" fill={color} opacity="0.7" />
+    <Circle cx="52" cy="48" r="2" fill={color} opacity="0.7" />
     <Path
       d="M 22 40 Q 30 37 40 40"
-      stroke="#FFFFFF"
+      stroke={color}
       strokeWidth="1.8"
       fill="none"
       opacity="0.4"
     />
     <Path
       d="M 58 40 Q 50 43 40 40"
-      stroke="#FFFFFF"
+      stroke={color}
       strokeWidth="1.8"
       fill="none"
       opacity="0.4"
@@ -471,9 +517,9 @@ export const VorticeIcon = ({ color }: { color: string }) => (
 
 export const ReciclarIcon = ({ color }: { color: string }) => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
-    <Rect x="25" y="15" width="35" height="50" rx="3" fill={color} />
+    <Rect x="22.5" y="15" width="35" height="50" rx="3" fill={color} />
     <Circle
-      cx="42.5"
+      cx="40"
       cy="40"
       r="14"
       fill="none"
@@ -481,7 +527,7 @@ export const ReciclarIcon = ({ color }: { color: string }) => (
       strokeWidth="2.5"
     />
     <SvgText
-      x="42.5"
+      x="40"
       y="41"
       fontSize="16"
       fill="#000000"
@@ -491,7 +537,7 @@ export const ReciclarIcon = ({ color }: { color: string }) => (
       →
     </SvgText>
     <SvgText
-      x="42.5"
+      x="40"
       y="52"
       fontSize="16"
       fill="#000000"
@@ -505,21 +551,17 @@ export const ReciclarIcon = ({ color }: { color: string }) => (
 
 export const PoderExtraIcon = ({ color }: { color: string }) => (
   <Svg width="80" height="80" viewBox="0 0 80 80">
-    <Rect x="25" y="15" width="35" height="50" rx="3" fill={color} />
-
-    {/* Círculo ao redor */}
+    <Rect x="22.5" y="15" width="35" height="50" rx="3" fill={color} />
     <Circle
-      cx="42.5"
+      cx="40"
       cy="40"
       r="15"
       stroke="#FFFFFF"
       strokeWidth="3"
       fill="none"
     />
-
-    {/* Raio */}
     <Path
-      d="M 45 25 L 37 40 L 43 40 L 40 55 L 48 40 L 42 40 Z"
+      d="M 43 26 L 35 40 L 41 40 L 37 54 L 45 40 L 39 40 Z"
       fill="#FFFFFF"
     />
   </Svg>
@@ -593,6 +635,74 @@ export const CardsIcon = ({ size = 24, color = '#3B82F6' }) => (
   </Svg>
 );
 
+export const NulificarIcon = () => (
+  <Svg width="80" height="80" viewBox="0 0 80 80">
+    <Path
+      d="M 40 12 L 62 22 L 62 44 Q 62 60 40 70 Q 18 60 18 44 L 18 22 Z"
+      fill="#1F2937"
+      stroke="#FFFFFF"
+      strokeWidth="3"
+    />
+    <Line
+      x1="26"
+      y1="26"
+      x2="54"
+      y2="54"
+      stroke="#FFFFFF"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+    <Line
+      x1="54"
+      y1="26"
+      x2="26"
+      y2="54"
+      stroke="#FFFFFF"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+  </Svg>
+);
+
+export const TrocarLivreIcon = () => (
+  <Svg width="80" height="80" viewBox="0 0 80 80">
+    <Line
+      x1="32"
+      y1="62"
+      x2="32"
+      y2="24"
+      stroke="#FFFFFF"
+      strokeWidth="5"
+      strokeLinecap="round"
+    />
+    <Path
+      d="M 23 34 L 32 20 L 41 34"
+      fill="none"
+      stroke="#FFFFFF"
+      strokeWidth="5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Line
+      x1="48"
+      y1="18"
+      x2="48"
+      y2="56"
+      stroke="#FFFFFF"
+      strokeWidth="5"
+      strokeLinecap="round"
+    />
+    <Path
+      d="M 39 46 L 48 60 L 57 46"
+      fill="none"
+      stroke="#FFFFFF"
+      strokeWidth="5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export const AstronautIcon = ({
   color = '#E91E63',
   armColor,
@@ -609,7 +719,6 @@ export const AstronautIcon = ({
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
-      {/* Braço esquerdo */}
       <Path
         d="M 28 58 Q 10 80 12 95"
         stroke={arm}
@@ -623,8 +732,6 @@ export const AstronautIcon = ({
         strokeWidth="22"
         fill="none"
       />
-
-      {/* Braço direito */}
       <Path
         d="M 72 58 Q 90 80 88 95"
         stroke={arm}
@@ -638,15 +745,12 @@ export const AstronautIcon = ({
         strokeWidth="22"
         fill="none"
       />
-
-      {/* Corpo/Tronco */}
       <Path
         d="M 32 50 Q 24 54 24 68 Q 22 78 22 88 Q 22 94 24 98 L 24 100 L 76 100 L 76 98 Q 78 94 78 88 Q 78 78 76 68 Q 76 54 68 50 Q 62 46 50 46 Q 38 46 32 50 Z"
         fill={color}
         stroke="#1a1a1a"
         strokeWidth="3"
       />
-      {/* Pescoço */}
       <Rect
         x="38"
         y="52"
@@ -657,7 +761,6 @@ export const AstronautIcon = ({
         stroke="#1a1a1a"
         strokeWidth="3"
       />
-      {/* Painel do peito */}
       <Rect
         x="38"
         y="78"
@@ -668,11 +771,9 @@ export const AstronautIcon = ({
         stroke="#1a1a1a"
         strokeWidth="2.5"
       />
-      {/* Pontinhos do painel */}
       <Circle cx="42" cy="86" r="2.2" fill="#abababff" />
       <Circle cx="50" cy="86" r="2.2" fill="#abababff" />
       <Circle cx="58" cy="86" r="2.2" fill="#abababff" />
-      {/* Capacete */}
       <Circle
         cx="50"
         cy="28"
@@ -681,7 +782,6 @@ export const AstronautIcon = ({
         stroke="#1a1a1a"
         strokeWidth="3"
       />
-      {/* Visor */}
       <Circle
         cx="50"
         cy="28"
@@ -690,7 +790,6 @@ export const AstronautIcon = ({
         stroke="#1a1a1a"
         strokeWidth="2.5"
       />
-      {/* Reflexos */}
       <Circle cx="43" cy="22" r="6" fill="rgba(200, 200, 200, 0.7)" />
       <Circle cx="49" cy="25" r="3" fill="rgba(255, 255, 255, 0.5)" />
     </Svg>

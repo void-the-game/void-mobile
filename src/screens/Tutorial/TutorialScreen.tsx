@@ -177,7 +177,7 @@ const TutorialScreen = () => {
         cards: [
           {
             title: 'Buraco Negro',
-            icon: <BuracoNegroIcon color="#8B5CF6" />,
+            icon: <BuracoNegroIcon color="#ffffff" />,
             desc: 'Todos os oponentes descartam 1 carta da cor designada. Se não tiverem, descartam 2 cartas!',
             color: '#FFFFFF',
           },
