@@ -54,12 +54,7 @@ export function ComboPlayModal({
       visible={visible}
       transparent
       animationType="fade"
-      supportedOrientations={[
-        'portrait',
-        'landscape',
-        'landscape-left',
-        'landscape-right',
-      ]}
+      supportedOrientations={['landscape', 'landscape-left', 'landscape-right']}
     >
       <View style={modalStyles.overlay}>
         <View

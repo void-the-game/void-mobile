@@ -52,12 +52,7 @@ export function InterruptModal({
       visible={visible}
       transparent
       animationType="slide"
-      supportedOrientations={[
-        'portrait',
-        'landscape',
-        'landscape-left',
-        'landscape-right',
-      ]}
+      supportedOrientations={['landscape', 'landscape-left', 'landscape-right']}
     >
       <View style={modalStyles.overlay}>
         <View

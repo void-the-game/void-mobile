@@ -239,12 +239,7 @@ export function SpaceTransitionOverlay({
       transparent
       animationType="none"
       statusBarTranslucent
-      supportedOrientations={[
-        'portrait',
-        'landscape',
-        'landscape-left',
-        'landscape-right',
-      ]}
+      supportedOrientations={['landscape', 'landscape-left', 'landscape-right']}
     >
       <Animated.View style={[styles.overlay, { opacity: fade }]}>
         <View style={styles.backdrop}>
