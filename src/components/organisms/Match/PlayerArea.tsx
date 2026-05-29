@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Pressable, Image, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Pressable, Image, StyleSheet, Animated } from 'react-native';
 import { Text } from '@/components/atoms/Text';
 import { useTheme } from '@/theme/hooks/useTheme';
 import { AstronautIcon } from '@/components/svg/svgIcons';
@@ -32,9 +32,26 @@ export function PlayerArea({
   playerAvatar,
 }: PlayerAreaProps) {
   const { fonts } = useTheme();
+  const animValuesRef = useRef<Map<string, Animated.Value>>(new Map());
 
-  // Ângulo máximo de 5° para leque mais suave
-  const angleStep = Math.min(5, 60 / Math.max(hand.length, 1));
+  // Inicializar e animar valores quando a seleção muda
+  useEffect(() => {
+    hand.forEach((card) => {
+      if (!animValuesRef.current.has(card.id)) {
+        animValuesRef.current.set(card.id, new Animated.Value(0));
+      }
+
+      const isSelected = card.id === selectedCardId;
+      Animated.timing(animValuesRef.current.get(card.id)!, {
+        toValue: isSelected ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [selectedCardId, hand]);
+
+  // Ângulo máximo de 2.5° para leque mais suave
+  const angleStep = Math.min(2.5, 60 / Math.max(hand.length, 1));
   // Espaçamento horizontal entre cartas: usa o espaço disponível
   // Quanto mais cartas, menor o passo — mínimo de 20px para sempre mostrar borda
   const horizontalStep = Math.max(
@@ -71,14 +88,20 @@ export function PlayerArea({
               const i = hand.indexOf(card);
               const isSelected = card.id === selectedCardId;
               const rotation = (i - (hand.length - 1) / 2) * angleStep;
-              const arcOffset = Math.abs(i - (hand.length - 1) / 2) * 2;
+              const arcOffset = Math.abs(i - (hand.length - 1) / 2) * 0.5;
               const horizontalOffset =
                 (i - (hand.length - 1) / 2) * horizontalStep;
 
+              const animValue =
+                animValuesRef.current.get(card.id) || new Animated.Value(0);
+              const animatedTranslateY = animValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [arcOffset, -20],
+              });
+
               return (
-                <Pressable
+                <Animated.View
                   key={card.id}
-                  testID={`player-card-${card.id}`}
                   style={[
                     styles.card,
                     {
@@ -89,63 +112,62 @@ export function PlayerArea({
                         ? '#1E293B'
                         : 'rgba(15,23,42,0.85)',
                       opacity: !isMyTurn && !isSelected ? 0.4 : 1,
-                      transform: isSelected
-                        ? [
-                            { translateX: horizontalOffset },
-                            { translateY: -20 },
-                            { rotate: `${rotation}deg` },
-                          ]
-                        : [
-                            { translateX: horizontalOffset },
-                            { translateY: arcOffset },
-                            { rotate: `${rotation}deg` },
-                          ],
+                      transform: [
+                        { translateX: horizontalOffset },
+                        { translateY: animatedTranslateY },
+                        { rotate: `${rotation}deg` },
+                      ],
                     },
                   ]}
-                  onPress={() => onSelectCard(card)}
                 >
-                  {/* Barra de cor no topo */}
-                  <View
-                    style={[
-                      styles.cardColorBar,
-                      { backgroundColor: card.color },
-                    ]}
-                  />
-
-                  {/* Ícone da carta */}
-                  <View style={styles.cardIconWrapper}>
-                    <CardIcon
-                      iconName={getCardIconName(card.type)}
-                      color={card.color}
-                      textColor={getCardTextColor(card.color)}
-                      size={38}
-                    />
-                  </View>
-
-                  {/* Nome curto da carta */}
-                  <Text
-                    style={[
-                      styles.cardType,
-                      {
-                        fontFamily: fonts.family.aldrich,
-                        color: isSelected ? '#F8FAFC' : '#CBD5E1',
-                      },
-                    ]}
-                    numberOfLines={2}
+                  <Pressable
+                    testID={`player-card-${card.id}`}
+                    style={styles.cardPressable}
+                    onPress={() => onSelectCard(card)}
                   >
-                    {translateCard(card.type)}
-                  </Text>
-
-                  {/* Indicador de seleção */}
-                  {isSelected && (
+                    {/* Barra de cor no topo */}
                     <View
                       style={[
-                        styles.selectedDot,
+                        styles.cardColorBar,
                         { backgroundColor: card.color },
                       ]}
                     />
-                  )}
-                </Pressable>
+
+                    {/* Ícone da carta */}
+                    <View style={styles.cardIconWrapper}>
+                      <CardIcon
+                        iconName={getCardIconName(card.type)}
+                        color={card.color}
+                        textColor={getCardTextColor(card.color)}
+                        size={38}
+                      />
+                    </View>
+
+                    {/* Nome curto da carta */}
+                    <Text
+                      style={[
+                        styles.cardType,
+                        {
+                          fontFamily: fonts.family.aldrich,
+                          color: isSelected ? '#F8FAFC' : '#CBD5E1',
+                        },
+                      ]}
+                      numberOfLines={2}
+                    >
+                      {translateCard(card.type)}
+                    </Text>
+
+                    {/* Indicador de seleção */}
+                    {isSelected && (
+                      <View
+                        style={[
+                          styles.selectedDot,
+                          { backgroundColor: card.color },
+                        ]}
+                      />
+                    )}
+                  </Pressable>
+                </Animated.View>
               );
             })}
         </View>
@@ -193,7 +215,8 @@ const styles = StyleSheet.create({
     height: '40%',
     width: '100%',
     overflow: 'hidden',
-    paddingBottom: 8,
+    paddingBottom: 32,
+    paddingHorizontal: 8,
   },
   emptyState: {
     flex: 1,
@@ -219,6 +242,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     overflow: 'hidden',
+    alignItems: 'center',
+  },
+  cardPressable: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   cardColorBar: {

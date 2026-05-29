@@ -48,7 +48,12 @@ export function InterruptModal({
   });
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      supportedOrientations={['landscape', 'landscape-left', 'landscape-right']}
+    >
       <View style={modalStyles.overlay}>
         <View
           style={[
@@ -167,6 +172,7 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'flex-end',
+    paddingHorizontal: 20,
   },
   sheet: {
     borderTopLeftRadius: 24,

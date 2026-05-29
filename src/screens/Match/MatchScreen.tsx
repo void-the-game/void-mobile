@@ -48,7 +48,6 @@ export default function MatchScreen() {
     playCard,
     playInterrupt,
     sendForcedDiscard,
-    syncState,
     dismissInterrupt,
     dismissError,
     resetToLobby,
@@ -85,11 +84,25 @@ export default function MatchScreen() {
   // Força Landscape ao focar na tela, restaura Portrait ao sair
   useFocusEffect(
     useCallback(() => {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-      return () => {
-        ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      let isActive = true;
+
+      const lockLandscape = async () => {
+        if (!isActive) return;
+        await ScreenOrientation.unlockAsync();
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.LANDSCAPE,
         );
+      };
+
+      lockLandscape();
+
+      return () => {
+        isActive = false;
+        ScreenOrientation.unlockAsync().then(() => {
+          ScreenOrientation.lockAsync(
+            ScreenOrientation.OrientationLock.PORTRAIT_UP,
+          );
+        });
       };
     }, []),
   );
@@ -146,9 +159,7 @@ export default function MatchScreen() {
       <HUDOverlay
         isMyTurn={isMyTurn}
         selectedCard={selectedCard}
-        nickname={myNickname}
         onConfirmPlay={handleConfirmPlay}
-        onSync={syncState}
         timerProgress={timerProgress}
       />
 
