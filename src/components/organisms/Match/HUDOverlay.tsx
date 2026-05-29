@@ -8,9 +8,7 @@ import { Card } from '@/types/multiplayer.types';
 export interface HUDOverlayProps {
   isMyTurn: boolean;
   selectedCard: Card | null;
-  nickname: string;
   onConfirmPlay: () => void;
-  onSync: () => void;
   /** Progresso do timer: 1.0 = início, 0.0 = expirado. Undefined = sem timer */
   timerProgress?: number;
 }
@@ -18,9 +16,7 @@ export interface HUDOverlayProps {
 export function HUDOverlay({
   isMyTurn,
   selectedCard,
-  nickname,
   onConfirmPlay,
-  onSync,
   timerProgress,
 }: HUDOverlayProps) {
   const { fonts } = useTheme();
@@ -41,18 +37,6 @@ export function HUDOverlay({
 
   return (
     <View style={styles.overlay}>
-      {/* Nickname + Sync button — top-left */}
-      <View style={[styles.nicknameRow, { pointerEvents: 'auto' }]}>
-        <Text
-          style={[styles.nicknameText, { fontFamily: fonts.family.aldrich }]}
-        >
-          {nickname}
-        </Text>
-        <Pressable onPress={onSync} style={styles.syncBtn}>
-          <Feather name="refresh-cw" size={13} color="#94A3B8" />
-        </Pressable>
-      </View>
-
       {/* TurnIndicator badge + timer — top-right */}
       <View style={[styles.turnBadgeWrapper, { pointerEvents: 'auto' }]}>
         <View
@@ -134,27 +118,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     pointerEvents: 'box-none',
   },
-  nicknameRow: {
-    position: 'absolute',
-    top: 8,
-    left: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  nicknameText: {
-    color: '#94A3B8',
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  syncBtn: {
-    padding: 6,
-  },
   turnBadgeWrapper: {
     position: 'absolute',
     top: 8,
-    right: 12,
+    right: 24,
     alignItems: 'stretch',
     gap: 4,
   },
@@ -185,7 +152,7 @@ const styles = StyleSheet.create({
   playButton: {
     position: 'absolute',
     bottom: 16,
-    right: 16,
+    right: 24,
     width: 64,
     height: 64,
     borderRadius: 32,

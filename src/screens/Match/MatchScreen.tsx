@@ -49,7 +49,6 @@ export default function MatchScreen() {
     playCard,
     playInterrupt,
     sendForcedDiscard,
-    syncState,
     dismissInterrupt,
     dismissError,
     resetToLobby,
@@ -133,20 +132,27 @@ export default function MatchScreen() {
     prevDiscardTopIdRef.current = currentTopId;
   }, [playerView?.discardPile]);
 
-  const handlePlayCardWithAnimation = useCallback(() => {
-    if (!selectedCard) return;
-
-    handleConfirmPlay();
-  }, [selectedCard, handleConfirmPlay]);
-
   useFocusEffect(
     useCallback(() => {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+      let isActive = true;
+
+      const lockLandscape = async () => {
+        if (!isActive) return;
+        await ScreenOrientation.unlockAsync();
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.LANDSCAPE,
+        );
+      };
+
+      lockLandscape();
 
       return () => {
-        ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
-        );
+        isActive = false;
+        ScreenOrientation.unlockAsync().then(() => {
+          ScreenOrientation.lockAsync(
+            ScreenOrientation.OrientationLock.PORTRAIT_UP,
+          );
+        });
       };
     }, []),
   );
@@ -220,9 +226,7 @@ export default function MatchScreen() {
       <HUDOverlay
         isMyTurn={isMyTurn}
         selectedCard={selectedCard}
-        nickname={myNickname}
-        onConfirmPlay={handlePlayCardWithAnimation}
-        onSync={syncState}
+        onConfirmPlay={handleConfirmPlay}
         timerProgress={timerProgress}
       />
 
