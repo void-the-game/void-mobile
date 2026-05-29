@@ -50,7 +50,17 @@ export function ComboPlayModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      supportedOrientations={[
+        'portrait',
+        'landscape',
+        'landscape-left',
+        'landscape-right',
+      ]}
+    >
       <View style={modalStyles.overlay}>
         <View
           style={[

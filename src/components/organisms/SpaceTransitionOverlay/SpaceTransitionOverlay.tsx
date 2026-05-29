@@ -234,7 +234,18 @@ export function SpaceTransitionOverlay({
   if (!visible) return null;
 
   return (
-    <Modal visible transparent animationType="none" statusBarTranslucent>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      supportedOrientations={[
+        'portrait',
+        'landscape',
+        'landscape-left',
+        'landscape-right',
+      ]}
+    >
       <Animated.View style={[styles.overlay, { opacity: fade }]}>
         <View style={styles.backdrop}>
           {STARS.map((star, index) => (

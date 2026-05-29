@@ -47,7 +47,17 @@ export function ForcedDiscardModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      supportedOrientations={[
+        'portrait',
+        'landscape',
+        'landscape-left',
+        'landscape-right',
+      ]}
+    >
       <View style={modalStyles.overlay}>
         <View
           style={[
