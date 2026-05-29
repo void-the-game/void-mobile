@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -16,6 +16,7 @@ import { Paths } from '@/navigation/paths';
 import { StarField } from '@/components/molecules/StarField';
 import { FloatingGlowDots } from '@/components/organisms/FloatingGlowDots/FloatingGlowDots';
 import { generateStarCoordinates } from '@/utils/generateStarCoordinates';
+import type { Card } from '@/types/multiplayer.types';
 
 import {
   InterruptModal,
@@ -77,15 +78,71 @@ export default function MatchScreen() {
     myHand,
     currentTurnIndex: playerView?.currentTurnIndex,
     onAutoPlay: (card) => {
-      // Chama playCard diretamente com o cardId — sem depender do estado selectedCard
       playCard({ cardId: card.id });
     },
   });
 
-  // Força Landscape ao focar na tela, restaura Portrait ao sair
+  // ─── Animações baseadas no estado do backend (Socket.IO) ─────────────────
+  const [drawAnimationKey, setDrawAnimationKey] = useState(0);
+  const [discardAnimationKey, setDiscardAnimationKey] = useState(0);
+  const [discardPreviewCard, setDiscardPreviewCard] = useState<Card | null>(
+    null,
+  );
+
+  const prevHandLengthRef = React.useRef(0);
+  const prevDiscardTopIdRef = React.useRef<string | null>(null);
+
+  // Compra: dispara quando myHand.length aumenta (início de turno + extras)
+  useEffect(() => {
+    const prevLen = prevHandLengthRef.current;
+    const currentLen = myHand.length;
+
+    if (prevLen === 0) {
+      prevHandLengthRef.current = currentLen;
+      return;
+    }
+
+    if (currentLen > prevLen) {
+      const diff = currentLen - prevLen;
+
+      for (let i = 0; i < diff; i++) {
+        setTimeout(() => {
+          setDrawAnimationKey((v) => v + 1);
+        }, i * 140);
+      }
+    }
+
+    prevHandLengthRef.current = currentLen;
+  }, [myHand.length]);
+
+  // Descarte: dispara quando o topo de discardPile muda
+  useEffect(() => {
+    const topCard =
+      playerView?.discardPile && playerView.discardPile.length > 0
+        ? playerView.discardPile[playerView.discardPile.length - 1]
+        : null;
+
+    const currentTopId = topCard ? String(topCard.id ?? '') : null;
+    const prevTopId = prevDiscardTopIdRef.current;
+
+    if (currentTopId && currentTopId !== prevTopId) {
+      setDiscardPreviewCard(topCard);
+      setDiscardAnimationKey((v) => v + 1);
+    }
+
+    prevDiscardTopIdRef.current = currentTopId;
+  }, [playerView?.discardPile]);
+
+  const handlePlayCardWithAnimation = useCallback(() => {
+    if (!selectedCard) return;
+
+    handleConfirmPlay();
+  }, [selectedCard, handleConfirmPlay]);
+
   useFocusEffect(
     useCallback(() => {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
       return () => {
         ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT_UP,
@@ -94,17 +151,27 @@ export default function MatchScreen() {
     }, []),
   );
 
-  // Exibe erros via Toast
   useEffect(() => {
     if (error) {
-      Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
+      Toast.show({
+        type: 'error',
+        text1: 'Jogada inválida',
+        text2: error,
+      });
       dismissError();
     }
   }, [error, dismissError]);
 
+  useEffect(() => {
+    if (!selectedCard) {
+      setDiscardPreviewCard(null);
+    }
+  }, [selectedCard]);
+
   if (gameOver) {
     const isWinner =
       gameOver.winnerId === myId || gameOver.winnerId === mySocketId;
+
     return (
       <GameOverView
         won={isWinner}
@@ -121,9 +188,10 @@ export default function MatchScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar hidden />
-      {/* Fundo espacial */}
+
       <StarField stars={stars} style={StyleSheet.absoluteFillObject} />
       <FloatingGlowDots />
+
       <OpponentArea
         opponent={opponents[0]}
         isOpponentTurn={currentTurnPlayerId === opponents[0]?.id}
@@ -132,6 +200,12 @@ export default function MatchScreen() {
       <TableArea
         discardPile={playerView?.discardPile ?? []}
         deckRemaining={playerView?.deck?.remaining ?? 0}
+        onDrawCard={() => {
+          setDrawAnimationKey((v) => v + 1);
+        }}
+        drawAnimationKey={drawAnimationKey}
+        discardAnimationKey={discardAnimationKey}
+        discardPreviewCard={discardPreviewCard}
       />
 
       <PlayerArea
@@ -147,14 +221,13 @@ export default function MatchScreen() {
         isMyTurn={isMyTurn}
         selectedCard={selectedCard}
         nickname={myNickname}
-        onConfirmPlay={handleConfirmPlay}
+        onConfirmPlay={handlePlayCardWithAnimation}
         onSync={syncState}
         timerProgress={timerProgress}
       />
 
       <ActivityLogOverlay log={activityLog ?? []} />
 
-      {/* ── Modais ───────────────────────────────────────────────────── */}
       {interrupt ? (
         <InterruptModal
           visible={!!interrupt}
