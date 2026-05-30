@@ -50,7 +50,12 @@ export function ComboPlayModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      supportedOrientations={['landscape', 'landscape-left', 'landscape-right']}
+    >
       <View style={modalStyles.overlay}>
         <View
           style={[
@@ -202,6 +207,7 @@ const modalStyles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.65)',
     justifyContent: 'center',
     padding: 20,
+    paddingHorizontal: 20,
   },
   sheet: {
     borderRadius: 20,

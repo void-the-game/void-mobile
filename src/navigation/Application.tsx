@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Paths } from '@/navigation/paths';
 import { Home, SignIn, SignUp, EditProfile, SetupProfile } from '@/screens';
 import TutorialScreen from '@/screens/Tutorial/TutorialScreen';
+import TutorialPrompt from '@/screens/TutorialPrompt/TutorialPrompt';
 import LobbyScreen from '@/screens/Lobby/LobbyScreen';
 import MatchScreen from '@/screens/Match/MatchScreen';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
@@ -22,6 +23,10 @@ function ApplicationNavigator() {
           <Stack.Screen component={SignUp} name={Paths.SignUp} />
           <Stack.Screen component={Home} name={Paths.Home} />
           <Stack.Screen component={TutorialScreen} name={Paths.Tutorial} />
+          <Stack.Screen
+            component={TutorialPrompt}
+            name={Paths.TutorialPrompt}
+          />
           <Stack.Screen component={EditProfile} name={Paths.EditProfile} />
           <Stack.Screen component={SetupProfile} name={Paths.SetupProfile} />
           <Stack.Screen component={LobbyScreen} name={Paths.Lobby} />

@@ -62,6 +62,14 @@ const navStyles = StyleSheet.create({
     paddingTop: 8,
   },
   tab: { flex: 1, alignItems: 'center', gap: 3 },
-  label: { fontSize: 11, color: '#64748B' },
-  labelActive: { color: '#3B82F6', fontWeight: '600' },
+  label: {
+    fontFamily: 'Aldrich_400Regular',
+    fontSize: 11,
+    color: '#64748B',
+  },
+  labelActive: {
+    fontFamily: 'Aldrich_400Regular',
+    color: '#3B82F6',
+    fontWeight: '600',
+  },
 });

@@ -1,4 +1,10 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -29,9 +35,13 @@ import {
   ActivityLogOverlay,
 } from '@/components/organisms/Match';
 
+import { VoidLoadingScreen } from '@/screens/LoadingScreen/LoadingScreen';
+
 export default function MatchScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const stars = useMemo(() => generateStarCoordinates({ quantity: 30 }), []);
 
@@ -48,18 +58,13 @@ export default function MatchScreen() {
     playCard,
     playInterrupt,
     sendForcedDiscard,
-    syncState,
     dismissInterrupt,
     dismissError,
     resetToLobby,
   } = useMultiplayerRoom();
 
   const { isMyTurn, myHand, opponents, currentTurnPlayerId, me } =
-    useMatchPlayer({
-      playerView,
-      myId,
-      mySocketId,
-    });
+    useMatchPlayer({ playerView, myId, mySocketId });
 
   const {
     selectedCard,
@@ -77,24 +82,38 @@ export default function MatchScreen() {
     myHand,
     currentTurnIndex: playerView?.currentTurnIndex,
     onAutoPlay: (card) => {
-      // Chama playCard diretamente com o cardId — sem depender do estado selectedCard
       playCard({ cardId: card.id });
     },
   });
 
-  // Força Landscape ao focar na tela, restaura Portrait ao sair
+  const deckRef = useRef<View>(null);
+  const discardRef = useRef<View>(null);
+
   useFocusEffect(
     useCallback(() => {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-      return () => {
-        ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
+      let isActive = true;
+
+      const lockLandscape = async () => {
+        if (!isActive) return;
+        await ScreenOrientation.unlockAsync();
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.LANDSCAPE,
         );
+      };
+
+      lockLandscape();
+
+      return () => {
+        isActive = false;
+        ScreenOrientation.unlockAsync().then(() => {
+          ScreenOrientation.lockAsync(
+            ScreenOrientation.OrientationLock.PORTRAIT_UP,
+          );
+        });
       };
     }, []),
   );
 
-  // Exibe erros via Toast
   useEffect(() => {
     if (error) {
       Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
@@ -102,9 +121,24 @@ export default function MatchScreen() {
     }
   }, [error, dismissError]);
 
+  // ── Loading screen ──────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <>
+        <StatusBar hidden />
+        <VoidLoadingScreen
+          duration={3200}
+          onFinish={() => setIsLoading(false)}
+        />
+      </>
+    );
+  }
+
+  // ── Game over ───────────────────────────────────────────────────────────────
   if (gameOver) {
     const isWinner =
       gameOver.winnerId === myId || gameOver.winnerId === mySocketId;
+
     return (
       <GameOverView
         won={isWinner}
@@ -118,12 +152,14 @@ export default function MatchScreen() {
     );
   }
 
+  // ── Match ───────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar hidden />
-      {/* Fundo espacial */}
+
       <StarField stars={stars} style={StyleSheet.absoluteFillObject} />
       <FloatingGlowDots />
+
       <OpponentArea
         opponent={opponents[0]}
         isOpponentTurn={currentTurnPlayerId === opponents[0]?.id}
@@ -132,6 +168,9 @@ export default function MatchScreen() {
       <TableArea
         discardPile={playerView?.discardPile ?? []}
         deckRemaining={playerView?.deck?.remaining ?? 0}
+        onDrawCard={() => playCard({ cardId: '__draw__' })}
+        deckRef={deckRef}
+        discardRef={discardRef}
       />
 
       <PlayerArea
@@ -146,15 +185,12 @@ export default function MatchScreen() {
       <HUDOverlay
         isMyTurn={isMyTurn}
         selectedCard={selectedCard}
-        nickname={myNickname}
         onConfirmPlay={handleConfirmPlay}
-        onSync={syncState}
         timerProgress={timerProgress}
       />
 
       <ActivityLogOverlay log={activityLog ?? []} />
 
-      {/* ── Modais ───────────────────────────────────────────────────── */}
       {interrupt ? (
         <InterruptModal
           visible={!!interrupt}
