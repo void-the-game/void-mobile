@@ -79,7 +79,7 @@ export default function SetupProfile() {
 
       navigation.reset({
         index: 0,
-        routes: [{ name: Paths.Home }],
+        routes: [{ name: Paths.TutorialPrompt }],
       });
     } catch (error: any) {
       console.log('Erro ao criar perfil:', error?.response?.data || error);

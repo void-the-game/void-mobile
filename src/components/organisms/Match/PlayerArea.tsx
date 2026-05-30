@@ -25,7 +25,6 @@ interface PlayerAreaProps {
 
 export function PlayerArea({
   hand,
-  isMyTurn,
   selectedCardId,
   onSelectCard,
   playerName,
@@ -77,7 +76,6 @@ export function PlayerArea({
         </View>
       ) : (
         <View style={styles.fanContainer}>
-          {/* Renderizar não-selecionadas primeiro, selecionada por último (fica acima) */}
           {[...hand]
             .sort((a, b) => {
               const aSelected = a.id === selectedCardId ? 1 : 0;
@@ -94,6 +92,7 @@ export function PlayerArea({
 
               const animValue =
                 animValuesRef.current.get(card.id) || new Animated.Value(0);
+
               const animatedTranslateY = animValue.interpolate({
                 inputRange: [0, 1],
                 outputRange: [arcOffset, -20],
@@ -110,8 +109,8 @@ export function PlayerArea({
                         : 'rgba(255,255,255,0.15)',
                       backgroundColor: isSelected
                         ? '#1E293B'
-                        : 'rgba(15,23,42,0.85)',
-                      opacity: !isMyTurn && !isSelected ? 0.4 : 1,
+                        : 'rgba(15,23,42,0.96)',
+                      opacity: 1,
                       transform: [
                         { translateX: horizontalOffset },
                         { translateY: animatedTranslateY },
@@ -125,7 +124,6 @@ export function PlayerArea({
                     style={styles.cardPressable}
                     onPress={() => onSelectCard(card)}
                   >
-                    {/* Barra de cor no topo */}
                     <View
                       style={[
                         styles.cardColorBar,
@@ -133,7 +131,6 @@ export function PlayerArea({
                       ]}
                     />
 
-                    {/* Ícone da carta */}
                     <View style={styles.cardIconWrapper}>
                       <CardIcon
                         iconName={getCardIconName(card.type)}
@@ -143,7 +140,6 @@ export function PlayerArea({
                       />
                     </View>
 
-                    {/* Nome curto da carta */}
                     <Text
                       style={[
                         styles.cardType,
@@ -157,7 +153,6 @@ export function PlayerArea({
                       {translateCard(card.type)}
                     </Text>
 
-                    {/* Indicador de seleção */}
                     {isSelected && (
                       <View
                         style={[
@@ -173,7 +168,6 @@ export function PlayerArea({
         </View>
       )}
 
-      {/* Info do jogador local — canto inferior esquerdo */}
       <View style={styles.playerInfo}>
         <View style={styles.avatarContainer}>
           {playerAvatar ? (
@@ -187,6 +181,7 @@ export function PlayerArea({
             />
           )}
         </View>
+
         <View style={styles.playerNameColumn}>
           {playerName ? (
             <Text
@@ -199,6 +194,7 @@ export function PlayerArea({
               {playerName}
             </Text>
           ) : null}
+
           <Text
             style={[styles.cardCountText, { fontFamily: fonts.family.aldrich }]}
           >
@@ -274,7 +270,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     marginBottom: 4,
   },
-  // Info do jogador local
   playerInfo: {
     position: 'absolute',
     bottom: 10,

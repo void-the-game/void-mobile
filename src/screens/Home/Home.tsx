@@ -52,11 +52,13 @@ const levelStyles = StyleSheet.create({
     marginBottom: 4,
   },
   label: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 12,
     fontWeight: '600',
     color: '#60A5FA',
   },
   xp: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 11,
     color: '#94A3B8',
   },
@@ -116,6 +118,7 @@ export default function HomeScreen() {
     backgroundColor: colors.cardBackground,
     borderColor: colors.cardBorder,
   };
+
   const menuItems: MenuItem[] = [
     {
       title: 'Jogar agora',
@@ -133,13 +136,14 @@ export default function HomeScreen() {
     {
       title: 'Salas',
       icon: <RoomJoinIcon color="#3B82F6" size={48} />,
-      onPress: () => navigation.navigate(Paths.Lobby),
+      onPress: () => navigation.navigate(Paths.Lobby, undefined as any),
       disabled: false,
     },
     {
       title: 'Tutoriais',
       icon: <TutorialsIcon color="#A855F7" size={56} />,
-      onPress: () => navigation.navigate(Paths.Tutorial),
+      onPress: () =>
+        navigation.navigate(Paths.Tutorial, { returnToHome: true }),
       disabled: false,
     },
     {
@@ -172,7 +176,7 @@ export default function HomeScreen() {
 
   const handleTabChange = (tab: BottomTab) => {
     if (tab === 'profile') {
-      navigation.navigate(Paths.EditProfile);
+      navigation.navigate(Paths.EditProfile, undefined as any);
       return;
     }
 

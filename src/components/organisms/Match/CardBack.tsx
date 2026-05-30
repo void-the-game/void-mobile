@@ -32,7 +32,7 @@ export function CardBack({
   const centerY = 32.5;
   const oY = centerY + 2.7;
   const centerX = 22.5;
-  const gap = 10.5;
+  const gap = 10.1;
 
   const vX = centerX - gap * 1.5;
   const oX = centerX - gap * 0.5;
@@ -164,7 +164,7 @@ export function CardBack({
             alignmentBaseline="middle"
             dy="0.35em"
             fontSize="10"
-            fontWeight="900"
+            fontWeight="700"
             fill="rgba(253,230,138,0.9)"
             fontFamily="monospace"
           >
@@ -203,7 +203,7 @@ export function CardBack({
             alignmentBaseline="middle"
             dy="0.35em"
             fontSize="10"
-            fontWeight="900"
+            fontWeight="700"
             fill="rgba(253,230,138,0.9)"
             fontFamily="monospace"
           >
@@ -217,7 +217,7 @@ export function CardBack({
             alignmentBaseline="middle"
             dy="0.35em"
             fontSize="10"
-            fontWeight="900"
+            fontWeight="700"
             fill="rgba(253,230,138,0.9)"
             fontFamily="monospace"
           >

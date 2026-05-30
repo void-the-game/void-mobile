@@ -1,4 +1,10 @@
-import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -16,7 +22,6 @@ import { Paths } from '@/navigation/paths';
 import { StarField } from '@/components/molecules/StarField';
 import { FloatingGlowDots } from '@/components/organisms/FloatingGlowDots/FloatingGlowDots';
 import { generateStarCoordinates } from '@/utils/generateStarCoordinates';
-import type { Card } from '@/types/multiplayer.types';
 
 import {
   InterruptModal,
@@ -30,9 +35,13 @@ import {
   ActivityLogOverlay,
 } from '@/components/organisms/Match';
 
+import { VoidLoadingScreen } from '@/screens/LoadingScreen/LoadingScreen';
+
 export default function MatchScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const stars = useMemo(() => generateStarCoordinates({ quantity: 30 }), []);
 
@@ -55,11 +64,7 @@ export default function MatchScreen() {
   } = useMultiplayerRoom();
 
   const { isMyTurn, myHand, opponents, currentTurnPlayerId, me } =
-    useMatchPlayer({
-      playerView,
-      myId,
-      mySocketId,
-    });
+    useMatchPlayer({ playerView, myId, mySocketId });
 
   const {
     selectedCard,
@@ -81,56 +86,8 @@ export default function MatchScreen() {
     },
   });
 
-  // ─── Animações baseadas no estado do backend (Socket.IO) ─────────────────
-  const [drawAnimationKey, setDrawAnimationKey] = useState(0);
-  const [discardAnimationKey, setDiscardAnimationKey] = useState(0);
-  const [discardPreviewCard, setDiscardPreviewCard] = useState<Card | null>(
-    null,
-  );
-
-  const prevHandLengthRef = React.useRef(0);
-  const prevDiscardTopIdRef = React.useRef<string | null>(null);
-
-  // Compra: dispara quando myHand.length aumenta (início de turno + extras)
-  useEffect(() => {
-    const prevLen = prevHandLengthRef.current;
-    const currentLen = myHand.length;
-
-    if (prevLen === 0) {
-      prevHandLengthRef.current = currentLen;
-      return;
-    }
-
-    if (currentLen > prevLen) {
-      const diff = currentLen - prevLen;
-
-      for (let i = 0; i < diff; i++) {
-        setTimeout(() => {
-          setDrawAnimationKey((v) => v + 1);
-        }, i * 140);
-      }
-    }
-
-    prevHandLengthRef.current = currentLen;
-  }, [myHand.length]);
-
-  // Descarte: dispara quando o topo de discardPile muda
-  useEffect(() => {
-    const topCard =
-      playerView?.discardPile && playerView.discardPile.length > 0
-        ? playerView.discardPile[playerView.discardPile.length - 1]
-        : null;
-
-    const currentTopId = topCard ? String(topCard.id ?? '') : null;
-    const prevTopId = prevDiscardTopIdRef.current;
-
-    if (currentTopId && currentTopId !== prevTopId) {
-      setDiscardPreviewCard(topCard);
-      setDiscardAnimationKey((v) => v + 1);
-    }
-
-    prevDiscardTopIdRef.current = currentTopId;
-  }, [playerView?.discardPile]);
+  const deckRef = useRef<View>(null);
+  const discardRef = useRef<View>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -159,21 +116,25 @@ export default function MatchScreen() {
 
   useEffect(() => {
     if (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Jogada inválida',
-        text2: error,
-      });
+      Toast.show({ type: 'error', text1: 'Jogada inválida', text2: error });
       dismissError();
     }
   }, [error, dismissError]);
 
-  useEffect(() => {
-    if (!selectedCard) {
-      setDiscardPreviewCard(null);
-    }
-  }, [selectedCard]);
+  // ── Loading screen ──────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <>
+        <StatusBar hidden />
+        <VoidLoadingScreen
+          duration={3200}
+          onFinish={() => setIsLoading(false)}
+        />
+      </>
+    );
+  }
 
+  // ── Game over ───────────────────────────────────────────────────────────────
   if (gameOver) {
     const isWinner =
       gameOver.winnerId === myId || gameOver.winnerId === mySocketId;
@@ -191,6 +152,7 @@ export default function MatchScreen() {
     );
   }
 
+  // ── Match ───────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar hidden />
@@ -206,12 +168,9 @@ export default function MatchScreen() {
       <TableArea
         discardPile={playerView?.discardPile ?? []}
         deckRemaining={playerView?.deck?.remaining ?? 0}
-        onDrawCard={() => {
-          setDrawAnimationKey((v) => v + 1);
-        }}
-        drawAnimationKey={drawAnimationKey}
-        discardAnimationKey={discardAnimationKey}
-        discardPreviewCard={discardPreviewCard}
+        onDrawCard={() => playCard({ cardId: '__draw__' })}
+        deckRef={deckRef}
+        discardRef={discardRef}
       />
 
       <PlayerArea

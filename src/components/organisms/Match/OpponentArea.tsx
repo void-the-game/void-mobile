@@ -12,7 +12,9 @@ interface OpponentAreaProps {
 }
 
 const FAN_ANGLE_STEP = 5; // graus — leque mais suave
-const FAN_CARD_WIDTH = 52;
+const FAN_CARD_WIDTH = 58;
+const OPPONENT_CARD_WIDTH = 58;
+const OPPONENT_CARD_HEIGHT = 84;
 // Espaçamento horizontal entre CardBacks
 const getFanHorizontalStep = (count: number) =>
   Math.max(16, Math.min(FAN_CARD_WIDTH * 0.8, 160 / Math.max(count - 1, 1)));
@@ -85,6 +87,8 @@ export function OpponentArea({ opponent, isOpponentTurn }: OpponentAreaProps) {
                 key={i}
                 rotation={rotation}
                 offsetX={offsetX}
+                width={OPPONENT_CARD_WIDTH}
+                height={OPPONENT_CARD_HEIGHT}
                 style={styles.fanCard}
               />
             );

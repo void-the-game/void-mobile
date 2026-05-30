@@ -7,7 +7,11 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import type { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/navigation/types';
+import { Paths } from '@/navigation/paths';
 import {
   EssenciaIcon,
   CoringaIcon,
@@ -29,8 +33,15 @@ import {
 
 const { width } = Dimensions.get('window');
 
+type TutorialNavigation = StackNavigationProp<
+  RootStackParamList,
+  Paths.Tutorial
+>;
+type TutorialRoute = RouteProp<RootStackParamList, Paths.Tutorial>;
+
 const TutorialScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<TutorialNavigation>();
+  const route = useRoute<TutorialRoute>();
   const [currentPage, setCurrentPage] = useState(0);
 
   const pages = [
@@ -266,8 +277,7 @@ const TutorialScreen = () => {
     },
     {
       // Índice 9
-      title: 'Você está pronto para jogar!', // Remova ou deixe vazio
-      // Remova completamente a propriedade icon
+      title: 'Você está pronto para jogar!',
       content: {
         description:
           'Agora que conhece as regras, é hora de entrar no vazio e provar que você é o melhor!',
@@ -435,7 +445,6 @@ const TutorialScreen = () => {
               ))}
             </View>
           ))}
-          {/* REMOVA ESTE BLOCO INTEIRO */}
         </View>
       );
     }
@@ -444,7 +453,6 @@ const TutorialScreen = () => {
     if (currentPage === 9) {
       return (
         <View style={styles.readyContainer}>
-          {/* Remova esta linha: <Text style={styles.readyTitle}>{content.main}</Text> */}
           <Text style={styles.description}>{content.description}</Text>
           <View style={styles.highlightBox}>
             <Text style={styles.reminderTitle}>Lembre-se:</Text>
@@ -456,7 +464,14 @@ const TutorialScreen = () => {
           </View>
           <TouchableOpacity
             style={styles.startButton}
-            onPress={() => navigation.goBack()}
+            onPress={() =>
+              route.params?.returnToHome
+                ? navigation.reset({
+                    index: 0,
+                    routes: [{ name: Paths.Home }],
+                  })
+                : navigation.goBack()
+            }
           >
             <Text style={styles.startButtonText}>Começar a Jogar!</Text>
           </TouchableOpacity>
@@ -471,7 +486,16 @@ const TutorialScreen = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Tutorial - VOID</Text>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            onPress={() =>
+              route.params?.returnToHome
+                ? navigation.reset({
+                    index: 0,
+                    routes: [{ name: Paths.Home }],
+                  })
+                : navigation.goBack()
+            }
+          >
             <Text style={styles.closeButton}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -557,11 +581,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 28,
     fontWeight: 'bold',
     color: '#3B82F6',
   },
   closeButton: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 28,
     color: '#9CA3AF',
   },
@@ -576,6 +602,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
   },
   progressText: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 12,
     color: '#9CA3AF',
     marginTop: 8,
@@ -589,6 +616,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   pageTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 24,
     fontWeight: 'bold',
     color: '#60A5FA',
@@ -596,6 +624,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   description: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 16,
     color: '#D1D5DB',
     lineHeight: 24,
@@ -622,6 +651,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statLabel: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 12,
     color: '#60A5FA',
     fontWeight: '600',
@@ -636,6 +666,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   highlightTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 20,
     fontWeight: 'bold',
     color: '#60A5FA',
@@ -650,6 +681,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   warningText: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 14,
     color: '#FCA5A5',
   },
@@ -673,6 +705,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   colorName: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 16,
     color: '#E5E7EB',
     fontWeight: '600',
@@ -686,12 +719,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 16,
     fontWeight: 'bold',
     color: '#60A5FA',
     marginBottom: 12,
   },
   listItem: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 14,
     color: '#D1D5DB',
     marginBottom: 8,
@@ -716,12 +751,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 16,
     fontWeight: 'bold',
     color: '#E5E7EB',
     marginBottom: 6,
   },
   cardDesc: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 13,
     color: '#D1D5DB',
     lineHeight: 18,
@@ -731,6 +768,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   readyTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 28,
     fontWeight: 'bold',
     color: '#60A5FA',
@@ -738,12 +776,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   reminderTitle: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FBBF24',
     marginBottom: 12,
   },
   reminderItem: {
+    fontFamily: 'Aldrich_400Regular',
     fontSize: 14,
     color: '#D1D5DB',
     marginBottom: 8,
@@ -761,6 +801,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   startButtonText: {
+    fontFamily: 'Aldrich_400Regular',
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
@@ -784,11 +825,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#374151',
   },
   navButtonText: {
+    fontFamily: 'Aldrich_400Regular',
     color: '#FFFFFF',
     fontWeight: '600',
     fontSize: 14,
   },
   navButtonTextDisabled: {
+    fontFamily: 'Aldrich_400Regular',
     color: '#6B7280',
   },
 });
